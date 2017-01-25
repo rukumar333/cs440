@@ -1,2 +1,5 @@
 books/
 lectures/
+
+# Ignore C++ Files
+*.o
