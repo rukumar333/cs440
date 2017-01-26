@@ -27,8 +27,16 @@ struct Deque_DEFINE {
 };
 
 struct Deque_DEFINE_Iterator {
-  
+  size_t index;
+  Deque_DEFINE *deq;
+  int (*deref)(Deque_DEFINE_Iterator *it);
+  void (*inc)(Deque_DEFINE_Iterator *it);
+  void (*dec)(Deque_DEFINE_Iterator *it);  
 };
+
+void Deque_DEFINE_Iterator_ctor(Deque_DEFINE_Iterator *it, Deque_DEFINE *deq);
+
+/* -------- Deque Functions -------- */
 
 void resize(Deque_DEFINE *deq){
   assert(deq->end == deq->begin -1 || deq->end == deq->capacity - 1);
@@ -95,6 +103,20 @@ bool empty(Deque_DEFINE *deq) {
   return deq->queue_length == 0;
 }
 
+int at(Deque_DEFINE *deq, size_t index) {
+  return *(deq->array + index % deq->capacity);
+}
+
+Deque_DEFINE_Iterator begin() {
+  Deque_DEFINE_Iterator it;
+  Deque_DEFINE_Iterator_ctor(&it);
+  
+}
+
+Deque_DEFINE_Iterator end() {
+  
+}
+
 void PrintQueue(Deque_DEFINE *deq) {
   std::cout << "--------- Print Queue --------- " << std::endl;
   std::cout << "Capacity: " << deq->capacity << std::endl;
@@ -145,6 +167,29 @@ void Deque_DEFINE_dtor(Deque_DEFINE *deq) {
   deq->begin = 0;
   deq->end = 0;
   deq->queue_length = 0;
+}
+
+/* -------- Deque Iterator Functions ------- */
+int deref(Deque_DEFINE_Iterator *it) {
+  return *(it->deq->array + it->index % it->deq->capacity);
+}
+
+void inc(Deque_DEFINE_Iterator *it) {
+  it->index = it->index + 1 % it->deq->capacity;  
+}
+
+void dec(Deque_DEFINE_Iterator *it) {
+  if(it->index == 0)
+    it->index = it->deq->capacity - 1;
+  else
+    it->index = it->index - 1;
+}
+
+void Deque_DEFINE_Iterator_ctor(Deque_DEFINE_Iterator *it, Deque_DEFINE *deq) {
+  it->deref = deref;
+  it->inc = inc;
+  it->dec = dec;
+  it->deq = deq;  `
 }
 
 #endif // DEQUE_HPP_
