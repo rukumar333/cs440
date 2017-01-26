@@ -16,6 +16,7 @@ static const int INITIAL_CAPACITY = 2;
     t *array;								\
     size_t begin;							\
     size_t end;								\
+    char type_name[sizeof(#t)] = #t;					\
     bool (*compare_function)(const t &, const t &);			\
     void (*push_back)(Deque_##t *deq, t item);				\
     void (*push_front)(Deque_##t *deq, t item);				\
@@ -140,22 +141,6 @@ static const int INITIAL_CAPACITY = 2;
     std::cout << "Queue_Length: " << deq->queue_length << std::endl;	\
     std::cout << "Size: " << deq->queue_length << std::endl;		\
     std::cout << "Empty: " << deq->empty(deq) << std::endl;		\
-    std::cout << "------ Elements --------" << std::endl;		\
-    std::cout << "{";							\
-    if (deq->begin < deq->end) {					\
-      for(unsigned int i = deq->begin; i < deq->end; ++ i){		\
-	std::cout << *(deq->array + i) << ", ";				\
-      }									\
-    } else {								\
-      for(unsigned int i = deq->begin; i < deq->capacity; ++ i){	\
-	std::cout << *(deq->array + i) << ", ";				\
-      }									\
-      for(unsigned int i = 0; i < deq->end; ++ i){			\
-	std::cout << *(deq->array + i) << ", ";				\
-      }									\
-    }									\
-    std::cout << "}" << std::endl;					\
-    std::cout << "--------- ----------" << std::endl;			\
   }									\
  									\
   void Deque_##t##_ctor(Deque_##t *deq, bool (*compare_function)(const t &, const t &)) { \

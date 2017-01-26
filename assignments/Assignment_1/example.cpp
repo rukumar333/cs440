@@ -3,24 +3,24 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define Array_DEFINE(t)                                                        \
-    struct Array_##t {                                                         \
-        t data[10];                                                            \
-        t &(*at)(Array_##t *, int i);                                          \
-        void (*delet)(Array_##t *);                                            \
-    };                                                                         \
-    t &Array_##t##_at(Array_##t *ap, int i) {                                  \
-        assert(i < 10);                                                        \
-        return ap->data[i];                                                    \
-    }                                                                          \
-    void Array_##t##_delete(Array_##t *ap) {                                   \
-        free(ap);                                                              \
-    }                                                                          \
-    Array_##t *Array_##t##_new() {                                             \
-        Array_##t *ap = (Array_##t *) malloc(sizeof(Array_##t));               \
-        ap->at = &Array_##t##_at;                                              \
-        ap->delet = &Array_##t##_delete;                                       \
-        return ap;                                                             \
+#define Array_DEFINE(t)						\
+  struct Array_##t {						\
+    t data[10];							\
+    t &(*at)(Array_##t *, int i);				\
+    void (*delet)(Array_##t *);					\
+  };								\
+  t &Array_##t##_at(Array_##t *ap, int i) {			\
+    assert(i < 10);						\
+    return ap->data[i];						\
+  }								\
+  void Array_##t##_delete(Array_##t *ap) {			\
+    free(ap);							\
+  }								\
+  Array_##t *Array_##t##_new() {				\
+    Array_##t *ap = (Array_##t *) malloc(sizeof(Array_##t));	\
+    ap->at = &Array_##t##_at;					\
+    ap->delet = &Array_##t##_delete;				\
+    return ap;							\
     }
 
 Array_DEFINE(int)
