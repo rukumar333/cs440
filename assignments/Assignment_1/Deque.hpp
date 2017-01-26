@@ -43,6 +43,7 @@ static const int INITIAL_CAPACITY = 2;
   };									\
   									\
   void Deque_##t##_Iterator_ctor(Deque_##t##_Iterator *it, Deque_##t *deq); \
+  bool Deque_##t##_Iterator_equal(Deque_##t##_Iterator it1, Deque_##t##_Iterator it2); \
   									\
   void resize(Deque_##t *deq){						\
     assert(deq->end_index == deq->begin_index -1 || deq->end_index == deq->capacity - 1);	\
@@ -91,7 +92,7 @@ static const int INITIAL_CAPACITY = 2;
   }									\
   									\
   t front(Deque_##t *deq) {						\
-    return *(deq->array + deq->begin_index);					\
+    return *(deq->array + deq->begin_index);				\
   }									\
   									\
   t back(Deque_##t *deq) {						\
@@ -147,16 +148,25 @@ static const int INITIAL_CAPACITY = 2;
     std::cout << "Empty: " << deq->empty(deq) << std::endl;		\
   }									\
  									\
-  bool Deque_##t##_equal(Deque_##t *deq1, Deque_##t *deq2){		\
-    if(deq1->queue_length == deq2->queue_length){			\
-      									\
+  bool Deque_##t##_equal(Deque_##t deq1, Deque_##t deq2) {		\
+    if (deq1.queue_length == deq2.queue_length) {			\
+      Deque_##t##_Iterator it1 = deq1.begin(&deq1);			\
+      Deque_##t##_Iterator it2 = deq2.begin(&deq2);			\
+      while (!Deque_##t##_Iterator_equal(it1, deq1.end(&deq1)) &&	\
+	     !Deque_##t##_Iterator_equal(it2, deq2.end(&deq2))) {	\
+	if (deq1.compare_function(it1.deref(&it1), it2.deref(&it2)) != 0) { \
+	  return false;							\
+	}								\
+      }									\
+      return true;							\
     }									\
+    return false;							\
   }									\
 									\
   void Deque_##t##_ctor(Deque_##t *deq, bool (*compare_function)(const t &, const t &)) { \
     deq->compare_function = compare_function;				\
     deq->queue_length = 0;						\
-    deq->begin_index = 0;							\
+    deq->begin_index = 0;						\
     deq->end_index = 0;							\
     deq->array = new t[INITIAL_CAPACITY];				\
     deq->capacity = INITIAL_CAPACITY;					\
@@ -184,7 +194,7 @@ static const int INITIAL_CAPACITY = 2;
   }									\
  									\
   void dec(Deque_##t##_Iterator *it) {					\
-    if(it->index == 0)							\
+    if (it->index == 0)							\
       it->index = it->deq->capacity - 1;				\
     else								\
       it->index = it->index - 1;					\
