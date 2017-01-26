@@ -31,6 +31,7 @@ static const int INITIAL_CAPACITY = 2;
     void (*clear)(Deque_##t *deq);					\
     t &(*at)(Deque_##t *deq, size_t index);				\
     void (*sort)(Deque_##t *deq, Deque_##t##_Iterator start, Deque_##t##_Iterator last); \
+    int (*compare_function)(const void *item_1, const void *item_2);	\
     Deque_##t##_Iterator (*begin)(Deque_##t *deq);			\
     Deque_##t##_Iterator (*end)(Deque_##t *deq);			\
   };									\
@@ -139,7 +140,12 @@ static const int INITIAL_CAPACITY = 2;
     deq->clear(deq);							\
   }									\
 									\
-  void sort(Deque_##t *deq, Deque_##t##_Iterator start, Deque_##t##_Iterator last){ \
+  int compare_function(const void *item_1, const void *item_2){		\
+    									\
+    return 0;								\
+  }									\
+  									\
+  void sort(Deque_##t *deq, Deque_##t##_Iterator start, Deque_##t##_Iterator last) { \
     if (start.index > last.index) {					\
       t *array_new = new t[deq->capacity];				\
       std::memcpy(array_new, deq->array + deq->begin_index, (deq->capacity - deq->begin_index) * sizeof(t)); \
@@ -151,15 +157,7 @@ static const int INITIAL_CAPACITY = 2;
       delete[] deq->array;						\
       deq->array = array_new;						\
     }  									\
-    									\
-    									\
-  									\
-									\
-									\
-  									\
-									\
-									\
-  									\
+    qsort(deq->array, last.index - start.index, sizeof(t), deq->compare_function); \
   }									\
 									\
   void PrintQueue(Deque_##t *deq) {					\
@@ -209,6 +207,7 @@ static const int INITIAL_CAPACITY = 2;
     deq->end = end;							\
     deq->at = at;							\
     deq->sort = sort;							\
+    deq->compare_function = compare_function;				\
   }									\
  									\
   t &deref(Deque_##t##_Iterator *it) {					\
