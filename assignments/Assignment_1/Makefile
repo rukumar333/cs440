@@ -8,9 +8,6 @@ test: test.o
 mytest: mytest.o
 	$(CC) $(LDFLAGS) mytest.o -o mytest
 
-# Deque.o: Deque.cpp
-# 	$(CC) $(CFLAGS) -c Deque.cpp
-
 test.o: test.cpp Deque.hpp
 	$(CC) $(CFLAGS) -c test.cpp
 
