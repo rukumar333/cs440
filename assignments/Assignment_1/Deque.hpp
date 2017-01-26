@@ -18,18 +18,18 @@ static const int INITIAL_CAPACITY = 2;
     size_t begin_index;							\
     size_t end_index;							\
     char type_name[sizeof(#t)] = #t;					\
-    bool (*compare_function)(const t &, const t &);			\
-    void (*push_back)(Deque_##t *deq, t item);				\
-    void (*push_front)(Deque_##t *deq, t item);				\
+    bool (*less_than)(const t &, const t &);				\
+    void (*push_back)(Deque_##t *deq, const t &item);			\
+    void (*push_front)(Deque_##t *deq, const t &item);			\
     void (*pop_front)(Deque_##t *deq);					\
     void (*pop_back)(Deque_##t *deq);					\
-    t (*front)(Deque_##t *deq);						\
-    t (*back)(Deque_##t *deq);						\
+    t &(*front)(Deque_##t *deq);					\
+    t &(*back)(Deque_##t *deq);						\
     size_t (*size)(Deque_##t *deq);					\
     bool (*empty)(Deque_##t *deq);					\
     void (*dtor)(Deque_##t *deq);					\
     void (*clear)(Deque_##t *deq);					\
-    t (*at)(Deque_##t *deq, size_t index);				\
+    t &(*at)(Deque_##t *deq, size_t index);				\
     Deque_##t##_Iterator (*begin)(Deque_##t *deq);			\
     Deque_##t##_Iterator (*end)(Deque_##t *deq);			\
   };									\
@@ -37,7 +37,7 @@ static const int INITIAL_CAPACITY = 2;
   struct Deque_##t##_Iterator {						\
     size_t index;							\
     Deque_##t *deq;							\
-    t (*deref)(Deque_##t##_Iterator *it);				\
+    t &(*deref)(Deque_##t##_Iterator *it);				\
     void (*inc)(Deque_##t##_Iterator *it);				\
     void (*dec)(Deque_##t##_Iterator *it);				\
   };									\
@@ -46,9 +46,9 @@ static const int INITIAL_CAPACITY = 2;
   bool Deque_##t##_Iterator_equal(Deque_##t##_Iterator it1, Deque_##t##_Iterator it2); \
   									\
   void resize(Deque_##t *deq){						\
-    assert(deq->end_index == deq->begin_index -1 || deq->end_index == deq->capacity - 1);	\
+    assert(deq->end_index == deq->begin_index -1 || deq->end_index == deq->capacity - 1); \
     t *array_new = new t[deq->capacity * 2];				\
-    if (deq->begin_index < deq->end_index)						\
+    if (deq->begin_index < deq->end_index)				\
       std::memcpy(array_new, deq->array + deq->begin_index, (deq->end_index - deq->begin_index) * sizeof(t)); \
     else {								\
       std::memcpy(array_new, deq->array + deq->begin_index, (deq->capacity - deq->begin_index) * sizeof(t)); \
@@ -61,7 +61,7 @@ static const int INITIAL_CAPACITY = 2;
     deq->array = array_new;						\
   }									\
 									\
-  void push_back(Deque_##t *deq, t item) {				\
+  void push_back(Deque_##t *deq, const t &item) {			\
     if (deq->capacity - 1 == deq->queue_length) {			\
       resize(deq);							\
     }									\
@@ -70,7 +70,7 @@ static const int INITIAL_CAPACITY = 2;
     ++ deq->queue_length;						\
   }									\
 									\
-  void push_front(Deque_##t *deq, t item) {				\
+  void push_front(Deque_##t *deq, const t &item) {			\
     if (deq->capacity - 1 == deq->queue_length) {			\
       resize(deq);							\
     }									\
@@ -91,11 +91,11 @@ static const int INITIAL_CAPACITY = 2;
       deq->end_index = deq->capacity - 1;				\
   }									\
   									\
-  t front(Deque_##t *deq) {						\
+  t &front(Deque_##t *deq) {						\
     return *(deq->array + deq->begin_index);				\
   }									\
   									\
-  t back(Deque_##t *deq) {						\
+  t &back(Deque_##t *deq) {						\
     return *(deq->array + deq->end_index - 1);				\
   }									\
   									\
@@ -107,7 +107,7 @@ static const int INITIAL_CAPACITY = 2;
     return deq->queue_length == 0;					\
   }									\
   									\
-  t at(Deque_##t *deq, size_t index) {					\
+  t &at(Deque_##t *deq, size_t index) {					\
     return *(deq->array + index % deq->capacity);			\
   }									\
   									\
@@ -138,6 +138,23 @@ static const int INITIAL_CAPACITY = 2;
     deq->clear(deq);							\
   }									\
 									\
+  void sort(Deque_##t *deq, Deque_##t##_Iterator start, Deque_##t##_Iterator end){ \
+    									\
+  }  									\
+									\
+									\
+  									\
+									\
+									\
+  									\
+									\
+									\
+  									\
+									\
+									\
+  									\
+									\
+									\
   void PrintQueue(Deque_##t *deq) {					\
     std::cout << "--------- Print Queue --------- " << std::endl;	\
     std::cout << "Capacity: " << deq->capacity << std::endl;		\
@@ -154,7 +171,8 @@ static const int INITIAL_CAPACITY = 2;
       Deque_##t##_Iterator it2 = deq2.begin(&deq2);			\
       while (!Deque_##t##_Iterator_equal(it1, deq1.end(&deq1)) &&	\
 	     !Deque_##t##_Iterator_equal(it2, deq2.end(&deq2))) {	\
-	if (deq1.compare_function(it1.deref(&it1), it2.deref(&it2)) != 0) { \
+	if (deq1.less_than(it1.deref(&it1), it2.deref(&it2)) != 0 &&	\
+	    deq1.less_than(it2.deref(&it2), it1.deref(&it1)) != 0) {	\
 	  return false;							\
 	}								\
       }									\
@@ -163,8 +181,8 @@ static const int INITIAL_CAPACITY = 2;
     return false;							\
   }									\
 									\
-  void Deque_##t##_ctor(Deque_##t *deq, bool (*compare_function)(const t &, const t &)) { \
-    deq->compare_function = compare_function;				\
+  void Deque_##t##_ctor(Deque_##t *deq, bool (*less_than)(const t &, const t &)) { \
+    deq->less_than = less_than;						\
     deq->queue_length = 0;						\
     deq->begin_index = 0;						\
     deq->end_index = 0;							\
@@ -185,7 +203,7 @@ static const int INITIAL_CAPACITY = 2;
     deq->at = at;							\
   }									\
  									\
-  t deref(Deque_##t##_Iterator *it) {					\
+  t &deref(Deque_##t##_Iterator *it) {					\
     return *(it->deq->array + it->index % it->deq->capacity);		\
   }									\
  									\
