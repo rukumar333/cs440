@@ -28,7 +28,6 @@ int main(){
     std::cout << deq.front(&deq) << std::endl;
     deq.pop_front(&deq);
   }
-
-  Deque_DEFINE_dtor(&deq);
+  deq.dtor(&deq);
   return 0;
 }

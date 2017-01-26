@@ -24,6 +24,8 @@ struct Deque_DEFINE {
   int (*back)(Deque_DEFINE *deq);
   size_t (*size)(Deque_DEFINE *deq);
   bool (*empty)(Deque_DEFINE *deq);
+  void (*dtor)(Deque_DEFINE *deq);
+  void (*clear)(Deque_DEFINE *deq);
 };
 
 struct Deque_DEFINE_Iterator {
@@ -107,14 +109,34 @@ int at(Deque_DEFINE *deq, size_t index) {
   return *(deq->array + index % deq->capacity);
 }
 
-Deque_DEFINE_Iterator begin() {
+Deque_DEFINE_Iterator begin(Deque_DEFINE *deq) {
   Deque_DEFINE_Iterator it;
-  Deque_DEFINE_Iterator_ctor(&it);
-  
+  Deque_DEFINE_Iterator_ctor(&it, deq);
+  it.index = deq->begin;
+  return it;
 }
 
-Deque_DEFINE_Iterator end() {
-  
+Deque_DEFINE_Iterator end(Deque_DEFINE *deq) {
+  Deque_DEFINE_Iterator it;
+  Deque_DEFINE_Iterator_ctor(&it, deq);
+  it.index = deq->end;
+  return it;
+}
+
+void clear(Deque_DEFINE *deq){
+  deq->begin = 0;
+  deq->end = 0;
+  deq->queue_length = 0;
+}
+
+void dtor(Deque_DEFINE *deq) {
+  delete[] deq->array;
+  deq->array = NULL;
+  deq->capacity = 0;
+  deq->clear(deq);
+  // deq->begin = 0;
+  // deq->end = 0;
+  // deq->queue_length = 0;
 }
 
 void PrintQueue(Deque_DEFINE *deq) {
@@ -158,15 +180,8 @@ void Deque_DEFINE_ctor(Deque_DEFINE *deq, bool (*compare_function)(const int&, c
   deq->back = back;
   deq->size = size;
   deq->empty = empty;
-}
-
-void Deque_DEFINE_dtor(Deque_DEFINE *deq) {
-  delete[] deq->array;
-  deq->array = NULL;
-  deq->capacity = 0;
-  deq->begin = 0;
-  deq->end = 0;
-  deq->queue_length = 0;
+  deq->clear = clear;
+  deq->dtor = dtor;
 }
 
 /* -------- Deque Iterator Functions ------- */
@@ -185,11 +200,16 @@ void dec(Deque_DEFINE_Iterator *it) {
     it->index = it->index - 1;
 }
 
+bool Deque_DEFINE_Iterator_equal(Deque_DEFINE_Iterator it1, Deque_DEFINE_Iterator it2) {
+  return it1.index == it2.index;
+}
+
 void Deque_DEFINE_Iterator_ctor(Deque_DEFINE_Iterator *it, Deque_DEFINE *deq) {
   it->deref = deref;
   it->inc = inc;
   it->dec = dec;
-  it->deq = deq;  `
+  it->deq = deq;
 }
+
 
 #endif // DEQUE_HPP_
