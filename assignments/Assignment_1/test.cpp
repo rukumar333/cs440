@@ -459,13 +459,11 @@ main() {
        for(int i=0;i<20;i++)
            iter2.inc(&iter2);
 
-       for(int i=0;i<1000000;i++){
-	 std::cout << "I'th time: " << i << std::endl;
-	 std::cout << iter1.index << ", " << iter2.index << std::endl;
-	 deq1.sort(&deq1, iter1,iter2); 
-       }
+       for(int i=0;i<1000000;i++)
+       	   deq1.sort(&deq1, iter1,iter2);
 
        deq1.dtor(&deq1);
+
     }
 
    // Print allocation info

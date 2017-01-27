@@ -1,4 +1,9 @@
 #include "Deque.hpp"
+#include <stdlib.h>
+#include <assert.h>
+#include <stdio.h>
+#include <random>
+#include <unistd.h>
 
 /*
  * Test for class MyClass.
@@ -22,6 +27,12 @@ MyClass_print(const MyClass *o) {
 
 Deque_DEFINE(MyClass)
 
+bool
+int_less(const int &o1, const int &o2) {
+    return o1 < o2;
+}
+
+Deque_DEFINE(int)
 
 // bool Deque_MyClass_equal(Deque_MyClass deq1, Deque_MyClass deq2) {		
 //   if (deq1.queue_length == deq2.queue_length) {			
@@ -56,25 +67,31 @@ int main(){
   // if the two deques were constructed with different comparison
   // functions.
   {
-    Deque_MyClass deq1, deq2;
-    Deque_MyClass_ctor(&deq1, MyClass_less_by_id);
-    Deque_MyClass_ctor(&deq2, MyClass_less_by_id);
+      
+    Deque_int deq1;
+    Deque_int_ctor(&deq1, int_less);
 
-    deq1.push_back(&deq1, MyClass{1, "Joe"});
-    deq1.push_back(&deq1, MyClass{2, "Jane"});
-    deq1.push_back(&deq1, MyClass{3, "Mary"});
-    deq2.push_back(&deq2, MyClass{1, "Joe"});
-    deq2.push_back(&deq2, MyClass{2, "Jane"});
-    deq2.push_back(&deq2, MyClass{3, "Mary"});
-	    
-    assert(Deque_MyClass_equal(deq1, deq2));
-    deq1.pop_back(&deq1);
-    assert(!Deque_MyClass_equal(deq1, deq2));
-    deq1.push_back(&deq1, MyClass{4, "Mary"});
-    assert(!Deque_MyClass_equal(deq1, deq2));
+    std::default_random_engine e;
+    using rand = std::uniform_int_distribution<int>;
+
+    for (int i = 0; i < 1000; i++) {
+      deq1.push_back(&deq1, rand(-1000000, 1000000)(e));
+    }
+
+    auto iter1 = deq1.begin(&deq1);
+    auto iter2 = deq1.begin(&deq1);
+
+    for(int i=0;i<20;i++)
+      iter1.inc(&iter1);
+
+    for(int i=0;i<20;i++)
+      iter2.inc(&iter2);
+
+    for(int i=0;i<1;i++){
+      deq1.sort(&deq1, iter1,iter2); 
+    }
 
     deq1.dtor(&deq1);
-    deq2.dtor(&deq2);
   }
   return 0;
 }

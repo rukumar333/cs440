@@ -160,10 +160,10 @@ static const int INITIAL_CAPACITY = 10000000;
   int compare_##t(const void *item_1_ptr, const void *item_2_ptr){	\
     Deque_##t##_Element element_1 = *((Deque_##t##_Element*)item_1_ptr); \
     Deque_##t##_Element element_2 = *((Deque_##t##_Element*)item_2_ptr); \
-    if(element_1.less_than(element_1.item, element_2.item)){	\
+    if(element_1.less_than(element_1.item, element_2.item)){		\
       return -1;							\
     }									\
-    if(element_1.less_than(element_2.item, element_1.item)){	\
+    if(element_1.less_than(element_2.item, element_1.item)){		\
       return 1;								\
     }									\
     return 0;								\
@@ -180,8 +180,8 @@ static const int INITIAL_CAPACITY = 10000000;
       deq->end_index = ((deq->capacity - 1) - deq->begin_index) + deq->end_index; \
       delete[] deq->array;						\
       deq->array = array_new;						\
-    }  									\
-    qsort(deq->array + deq->begin_index, deq->end_index - deq->begin_index, \
+    }									\
+    qsort(deq->array + deq->begin_index, last.index - start.index,	\
 	  sizeof(Deque_##t##_Element), deq->compare_##t);		\
   }									\
 									\
