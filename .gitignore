@@ -3,3 +3,6 @@ lectures/
 
 # Ignore C++ Files
 *.o
+
+# Ignore archives
+*.tar.gz
