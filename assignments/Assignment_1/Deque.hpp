@@ -212,7 +212,7 @@ static const int INITIAL_CAPACITY = 10;
   }									\
  									\
   t &deref(Deque_##t##_Iterator *it) {					\
-    return *(it->deq->array + it->index % it->deq->capacity);		\
+    return *(it->deq->array + (it->index % it->deq->capacity));		\
   }									\
  									\
   void inc(Deque_##t##_Iterator *it) {					\
