@@ -22,6 +22,34 @@ MyClass_print(const MyClass *o) {
 
 Deque_DEFINE(MyClass)
 
+
+// bool Deque_MyClass_equal(Deque_MyClass deq1, Deque_MyClass deq2) {		
+//   if (deq1.queue_length == deq2.queue_length) {			
+//     Deque_MyClass_Iterator it1 = deq1.begin(&deq1);			
+//     Deque_MyClass_Iterator it2 = deq2.begin(&deq2);			
+//     std::cout << it1.index << std::endl;				
+//     std::cout << it2.index << std::endl;				
+//     while (!Deque_MyClass_Iterator_equal(it1, deq1.end(&deq1)) &&	
+// 	   !Deque_MyClass_Iterator_equal(it2, deq2.end(&deq2))) {	
+//       // if ((deq1.less_than(it1.deref(&it1), it2.deref(&it2)) == 0) ||	
+//       // 	  (deq1.less_than(it2.deref(&it2), it1.deref(&it1)) == 0)) {	
+//       // 	return false;							
+//       // }
+//       if(deq1.less_than(it1.deref(&it1), it2.deref(&it2)) == 0){
+// 	return false;
+//       }
+//       if(deq1.less_than(it2.deref(&it2), it1.deref(&it1)) == 0){
+// 	return false;
+//       }
+//       it1.inc(&it1);							
+//       it2.inc(&it2);							
+//     }									
+//     return true;							
+//   }									
+//   return false;
+// }
+
+
 int main(){
   // Test equality.  Two deques compare equal if they are of the same
   // length and all the elements compare equal.  It is undefined behavior

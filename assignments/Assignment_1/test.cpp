@@ -224,7 +224,6 @@ main() {
             deq2.dtor(&deq2);
         }
     }
-    return 0;
     // Test that it can handle other types.  Tests are the same, more or less.
     {
         Deque_int deq;

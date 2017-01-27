@@ -173,12 +173,10 @@ static const int INITIAL_CAPACITY = 10;
     if (deq1.queue_length == deq2.queue_length) {			\
       Deque_##t##_Iterator it1 = deq1.begin(&deq1);			\
       Deque_##t##_Iterator it2 = deq2.begin(&deq2);			\
-      std::cout << it1.index << std::endl;				\
-      std::cout << it2.index << std::endl;				\
       while (!Deque_##t##_Iterator_equal(it1, deq1.end(&deq1)) &&	\
 	     !Deque_##t##_Iterator_equal(it2, deq2.end(&deq2))) {	\
-	if (deq1.less_than(it1.deref(&it1), it2.deref(&it2)) == 0 ||	\
-	    deq1.less_than(it2.deref(&it2), it1.deref(&it1)) == 0) {	\
+	if (deq1.less_than(it1.deref(&it1), it2.deref(&it2)) ||		\
+	    deq1.less_than(it2.deref(&it2), it1.deref(&it1)) ) {	\
 	  return false;							\
 	}								\
 	it1.inc(&it1);							\
