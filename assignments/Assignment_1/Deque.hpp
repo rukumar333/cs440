@@ -1,13 +1,11 @@
-#include <cassert>
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
 #include <iostream>
+#include <stdlib.h>
+#include <string.h>
 
 #ifndef DEQUE_HPP_
 #define DEQUE_HPP_
 
-static const int INITIAL_CAPACITY = 10000000;
+static const int INITIAL_CAPACITY = 1000;
 
 #define Deque_DEFINE(t)                                                        \
   struct Deque_##t##_Iterator;                                                 \
@@ -57,25 +55,23 @@ static const int INITIAL_CAPACITY = 10000000;
   int compare_##t(const void *item_1_ptr, const void *item_2_ptr);             \
                                                                                \
   void resize(Deque_##t *deq) {                                                \
-    assert(deq->end_index == deq->begin_index - 1 ||                           \
-           deq->end_index == deq->capacity - 1);                               \
-    Deque_##t##_Element *array_new =                                           \
-        new Deque_##t##_Element[deq->capacity * 2];                            \
+    Deque_##t##_Element *array_new = (Deque_##t##_Element *)malloc(            \
+        sizeof(Deque_##t##_Element) * deq->capacity * 2);                      \
     if (deq->begin_index < deq->end_index)                                     \
-      std::memcpy(array_new, deq->array + deq->begin_index,                    \
-                  (deq->end_index - deq->begin_index) *                        \
-                      sizeof(Deque_##t##_Element));                            \
+      memcpy(array_new, deq->array + deq->begin_index,                         \
+             (deq->end_index - deq->begin_index) *                             \
+                 sizeof(Deque_##t##_Element));                                 \
     else {                                                                     \
-      std::memcpy(array_new, deq->array + deq->begin_index,                    \
-                  (deq->capacity - deq->begin_index) *                         \
-                      sizeof(Deque_##t##_Element));                            \
-      std::memcpy(array_new + (deq->capacity - deq->begin_index), deq->array,  \
-                  deq->end_index * sizeof(Deque_##t##_Element));               \
+      memcpy(array_new, deq->array + deq->begin_index,                         \
+             (deq->capacity - deq->begin_index) *                              \
+                 sizeof(Deque_##t##_Element));                                 \
+      memcpy(array_new + (deq->capacity - deq->begin_index), deq->array,       \
+             deq->end_index * sizeof(Deque_##t##_Element));                    \
     }                                                                          \
     deq->begin_index = 0;                                                      \
     deq->end_index = deq->capacity - 1;                                        \
     deq->capacity = deq->capacity * 2;                                         \
-    delete[] deq->array;                                                       \
+    free(deq->array);                                                          \
     deq->array = array_new;                                                    \
   }                                                                            \
                                                                                \
@@ -152,7 +148,7 @@ static const int INITIAL_CAPACITY = 10000000;
   }                                                                            \
                                                                                \
   void dtor(Deque_##t *deq) {                                                  \
-    delete[] deq->array;                                                       \
+    free(deq->array);                                                          \
     deq->array = NULL;                                                         \
     deq->capacity = 0;                                                         \
     deq->clear(deq);                                                           \
@@ -173,18 +169,19 @@ static const int INITIAL_CAPACITY = 10000000;
   void sort(Deque_##t *deq, Deque_##t##_Iterator start,                        \
             Deque_##t##_Iterator last) {                                       \
     if (start.index > last.index) {                                            \
-      Deque_##t##_Element *array_new = new Deque_##t##_Element[deq->capacity]; \
-      std::memcpy(array_new, deq->array + deq->begin_index,                    \
-                  (deq->capacity - deq->begin_index) *                         \
-                      sizeof(Deque_##t##_Element));                            \
-      std::memcpy(array_new + (deq->capacity - deq->begin_index), deq->array,  \
-                  deq->end_index * sizeof(Deque_##t##_Element));               \
+      Deque_##t##_Element *array_new = (Deque_##t##_Element *)malloc(          \
+          sizeof(Deque_##t##_Element) * deq->capacity);                        \
+      memcpy(array_new, deq->array + deq->begin_index,                         \
+             (deq->capacity - deq->begin_index) *                              \
+                 sizeof(Deque_##t##_Element));                                 \
+      memcpy(array_new + (deq->capacity - deq->begin_index), deq->array,       \
+             deq->end_index * sizeof(Deque_##t##_Element));                    \
       start.index = start.index - deq->begin_index;                            \
       last.index = ((deq->capacity - 1) - deq->begin_index) + last.index;      \
       deq->begin_index = 0;                                                    \
       deq->end_index =                                                         \
           ((deq->capacity - 1) - deq->begin_index) + deq->end_index;           \
-      delete[] deq->array;                                                     \
+      free(deq->array);                                                        \
       deq->array = array_new;                                                  \
     }                                                                          \
                                                                                \
@@ -227,7 +224,8 @@ static const int INITIAL_CAPACITY = 10000000;
     deq->queue_length = 0;                                                     \
     deq->begin_index = 0;                                                      \
     deq->end_index = 0;                                                        \
-    deq->array = new Deque_##t##_Element[INITIAL_CAPACITY];                    \
+    deq->array = (Deque_##t##_Element *)malloc(sizeof(Deque_##t##_Element) *   \
+                                               INITIAL_CAPACITY);              \
     deq->capacity = INITIAL_CAPACITY;                                          \
     deq->push_back = push_back;                                                \
     deq->push_front = push_front;                                              \
