@@ -225,6 +225,7 @@ main() {
         }
     }
     // Test that it can handle other types.  Tests are the same, more or less.
+    std::cout << "---------- Test for ints ----------" << std::endl;
     {
         Deque_int deq;
         Deque_int_ctor(&deq, int_less);

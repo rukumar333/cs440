@@ -113,7 +113,7 @@ static const int INITIAL_CAPACITY = 10;
   }									\
   									\
   t &at(Deque_##t *deq, size_t index) {					\
-    return *(deq->array + (index + deq->begin_index % deq->capacity));	\
+    return *(deq->array + ((index + deq->begin_index) % deq->capacity)); \
   }									\
   									\
   Deque_##t##_Iterator begin(Deque_##t *deq) {				\
