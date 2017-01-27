@@ -181,7 +181,8 @@ static const int INITIAL_CAPACITY = 10000000;
       delete[] deq->array;						\
       deq->array = array_new;						\
     }									\
-    qsort(deq->array + deq->begin_index, last.index - start.index,	\
+    									\
+    qsort(deq->array + deq->begin_index + start.index, last.index - start.index, \
 	  sizeof(Deque_##t##_Element), deq->compare_##t);		\
   }									\
 									\
