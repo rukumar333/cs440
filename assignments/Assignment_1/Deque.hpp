@@ -7,7 +7,7 @@
 #ifndef DEQUE_HPP_
 #define DEQUE_HPP_
 
-static const int INITIAL_CAPACITY = 2;
+static const int INITIAL_CAPACITY = 10;
 
 #define Deque_DEFINE(t)							\
   struct Deque_##t##_Iterator;						\
@@ -17,7 +17,7 @@ static const int INITIAL_CAPACITY = 2;
     t *array;								\
     size_t begin_index;							\
     size_t end_index;							\
-    char type_name[sizeof(#t)] = #t;					\
+    char type_name[sizeof("Deque_" #t)] = "Deque_" #t;			\
     bool (*less_than)(const t &, const t &);				\
     void (*push_back)(Deque_##t *deq, const t item);			\
     void (*push_front)(Deque_##t *deq, const t item);			\
@@ -77,6 +77,8 @@ static const int INITIAL_CAPACITY = 2;
     }									\
     if (deq->begin_index == 0)						\
       deq->begin_index = deq->capacity - 1;				\
+    else								\
+      deq->begin_index = deq->begin_index - 1;				\
     *(deq->array + deq->begin_index) = item;				\
     ++ deq->queue_length;						\
   }									\
@@ -90,6 +92,8 @@ static const int INITIAL_CAPACITY = 2;
     -- deq->queue_length;						\
     if (deq->end_index == 0)						\
       deq->end_index = deq->capacity - 1;				\
+    else								\
+      deq->end_index = deq->end_index - 1;				\
   }									\
   									\
   t &front(Deque_##t *deq) {						\
@@ -109,7 +113,7 @@ static const int INITIAL_CAPACITY = 2;
   }									\
   									\
   t &at(Deque_##t *deq, size_t index) {					\
-    return *(deq->array + index % deq->capacity);			\
+    return *(deq->array + (index + deq->begin_index % deq->capacity));	\
   }									\
   									\
   Deque_##t##_Iterator begin(Deque_##t *deq) {				\
@@ -169,12 +173,16 @@ static const int INITIAL_CAPACITY = 2;
     if (deq1.queue_length == deq2.queue_length) {			\
       Deque_##t##_Iterator it1 = deq1.begin(&deq1);			\
       Deque_##t##_Iterator it2 = deq2.begin(&deq2);			\
+      std::cout << it1.index << std::endl;				\
+      std::cout << it2.index << std::endl;				\
       while (!Deque_##t##_Iterator_equal(it1, deq1.end(&deq1)) &&	\
 	     !Deque_##t##_Iterator_equal(it2, deq2.end(&deq2))) {	\
-	if (deq1.less_than(it1.deref(&it1), it2.deref(&it2)) != 0 &&	\
-	    deq1.less_than(it2.deref(&it2), it1.deref(&it1)) != 0) {	\
+	if (deq1.less_than(it1.deref(&it1), it2.deref(&it2)) == 0 ||	\
+	    deq1.less_than(it2.deref(&it2), it1.deref(&it1)) == 0) {	\
 	  return false;							\
 	}								\
+	it1.inc(&it1);							\
+	it2.inc(&it2);							\
       }									\
       return true;							\
     }									\
@@ -210,7 +218,7 @@ static const int INITIAL_CAPACITY = 2;
   }									\
  									\
   void inc(Deque_##t##_Iterator *it) {					\
-    it->index = it->index + 1 % it->deq->capacity;			\
+    it->index = (it->index + 1) % it->deq->capacity;			\
   }									\
  									\
   void dec(Deque_##t##_Iterator *it) {					\
