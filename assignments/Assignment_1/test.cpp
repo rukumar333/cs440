@@ -10,7 +10,6 @@
 #include <random>
 #include <unistd.h>
 #include "Deque.hpp"
-#include <iostream>
 
 // May assume memcpy()-able.
 // May assume = operator.
@@ -142,10 +141,11 @@ main() {
 
         assert(deq.size(&deq) == 3);
 
-        // for (Deque_MyClass_Iterator it = deq.begin(&deq);
-        //  !Deque_MyClass_Iterator_equal(it, deq.end(&deq)); it.inc(&it)) {
-        //     MyClass_print(&it.deref(&it));
-        // }
+        for (Deque_MyClass_Iterator it = deq.begin(&deq);
+         !Deque_MyClass_Iterator_equal(it, deq.end(&deq)); it.inc(&it)) {
+            MyClass_print(&it.deref(&it));
+        }
+
         // Multiple iterators?
         for (Deque_MyClass_Iterator it1 = deq.begin(&deq);
          !Deque_MyClass_Iterator_equal(it1, deq.end(&deq)); it1.inc(&it1)) {
@@ -159,6 +159,7 @@ main() {
                 }
             }
         }
+
         // Test decrement of end.
         {
             auto it = deq.end(&deq);
@@ -171,7 +172,7 @@ main() {
         for (size_t i = 0; i < 3; i++) {
             MyClass_print(&deq.at(&deq, i));
         }
-	
+
         // Test that front(), back(), at(), and deref() are returning a reference.
         // Change via at().
         assert(deq.at(&deq, 0).id == 0);
@@ -194,10 +195,11 @@ main() {
             assert(deq.back(&deq).id == 2);
             assert(it.deref(&it).id == 2); // Verify with iterator also.
         }
+
         deq.clear(&deq);
 
         deq.dtor(&deq);
-	
+
         // Test equality.  Two deques compare equal if they are of the same
         // length and all the elements compare equal.  It is undefined behavior
         // if the two deques were constructed with different comparison
@@ -213,8 +215,9 @@ main() {
             deq2.push_back(&deq2, MyClass{1, "Joe"});
             deq2.push_back(&deq2, MyClass{2, "Jane"});
             deq2.push_back(&deq2, MyClass{3, "Mary"});
-	    
+
             assert(Deque_MyClass_equal(deq1, deq2));
+
             deq1.pop_back(&deq1);
             assert(!Deque_MyClass_equal(deq1, deq2));
             deq1.push_back(&deq1, MyClass{4, "Mary"});
@@ -224,8 +227,8 @@ main() {
             deq2.dtor(&deq2);
         }
     }
+
     // Test that it can handle other types.  Tests are the same, more or less.
-    std::cout << "---------- Test for ints ----------" << std::endl;
     {
         Deque_int deq;
         Deque_int_ctor(&deq, int_less);
@@ -456,11 +459,13 @@ main() {
        for(int i=0;i<20;i++)
            iter2.inc(&iter2);
 
-       for(int i=0;i<1000000;i++)
-       	   deq1.sort(&deq1, iter1,iter2);
+       for(int i=0;i<1000000;i++){
+	 std::cout << "I'th time: " << i << std::endl;
+	 std::cout << iter1.index << ", " << iter2.index << std::endl;
+	 deq1.sort(&deq1, iter1,iter2); 
+       }
 
        deq1.dtor(&deq1);
-
     }
 
    // Print allocation info
