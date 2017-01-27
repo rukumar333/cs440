@@ -143,8 +143,21 @@ static const int INITIAL_CAPACITY = 10;
     deq->clear(deq);							\
   }									\
 									\
+  int compare_##t(const void *item_1_ptr, const void *item_2_ptr){	\
+    t item_1 = *((t*)item_1_ptr);					\
+    t item_2 = *((t*)item_2_ptr);					\
+    									\
+									\
+    return 0;								\
+  }									\
+  									\
 									\
   									\
+									\
+  									\
+									\
+  									\
+									\
   void sort(Deque_##t *deq, Deque_##t##_Iterator start, Deque_##t##_Iterator last) { \
     if (start.index > last.index) {					\
       t *array_new = new t[deq->capacity];				\
