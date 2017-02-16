@@ -94,9 +94,9 @@ static const int INITIAL_CAPACITY = 1000;
     if (deq->capacity - 1 == deq->queue_length) {                              \
       resize(deq);                                                             \
     }                                                                          \
-    if (deq->begin_index == 0)                                                 \
+    if (deq->begin_index == 0) {                                               \
       deq->begin_index = deq->capacity - 1;                                    \
-    else                                                                       \
+    } else                                                                     \
       deq->begin_index = deq->begin_index - 1;                                 \
     *(deq->array + deq->begin_index) = element;                                \
     ++deq->queue_length;                                                       \

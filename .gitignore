@@ -6,3 +6,4 @@ lectures/
 
 # Ignore archives
 *.tar.gz
+*.zip
