@@ -7,3 +7,6 @@ lectures/
 # Ignore archives
 *.tar.gz
 *.zip
+
+# Ignore exe
+*.exe

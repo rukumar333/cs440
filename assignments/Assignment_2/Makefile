@@ -1,5 +1,5 @@
 CC = g++
-CFLAGS = -g -O3 -std=c++14 -Wall Wextra -pedantic
+CFLAGS = -g -O3 -std=c++14 -Wall -Wextra -pedantic
 LDFLAGS = -g
 
 test: test.o

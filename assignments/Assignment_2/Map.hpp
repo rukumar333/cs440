@@ -17,7 +17,7 @@ namespace cs540 {
 	typedef std::pair<const Key_T, Mapped_T> ValueType;
 	class Iterator {
 	 private:
-
+	  
 	 public:
 	  Iterator(const Iterator &other); // Implicit should be ok
 	  ~Iterator(); // Implicit should be ok
@@ -89,7 +89,7 @@ namespace cs540 {
 	ConstIterator find(const Key_T &key) const;
 	Mapped_T &at(const Key_T &key);
 	const Mapped_T &at(const Key_T &key) const;
-	Mapped_T &operator(const Key_T &key);
+	// Mapped_T &operator(const Key_T &key);
 	/*
 	  Modifier
 	 */
@@ -103,21 +103,45 @@ namespace cs540 {
 	/*
 	  Comparison
 	*/
-	bool operator==(const Map &first, const Map &second);
-	bool operator!=(const Map &first, const Map &second);
-	bool operator<(const Map &first, const Map &second);
   };
 }
 
-bool operator==(const Iterator &first, const Iterator &second);
-bool operator==(const ConstIterator &first, const ConstIterator &second);
-bool operator==(const Iterator &first, const ConstIterator &second);
-bool operator==(const ConstIterator &first, const Iterator &second);
-bool operator!=(const Iterator &first, const Iterator &second);
-bool operator!=(const ConstIterator &first, const ConstIterator &second);
-bool operator!=(const Iterator &first, const ConstIterator &second);
-bool operator!=(const ConstIterator &first, const Iterator &second);
-bool operator==(const ReverseIterator &first, const ReverseIterator &second);
-bool operator!=(const ReverseIterator &first, const ReverseIterator &second);
+template <typename Key_T, typename Mapped_T>
+bool operator==(const cs540::Map<Key_T, Mapped_T> &first, const cs540::Map<Key_T, Mapped_T> &second);
+template <typename Key_T, typename Mapped_T>
+bool operator!=(const cs540::Map<Key_T, Mapped_T> &first, const cs540::Map<Key_T, Mapped_T> &second);
+template <typename Key_T, typename Mapped_T>
+bool operator<(const cs540::Map<Key_T, Mapped_T> &first, const cs540::Map<Key_T, Mapped_T> &second);
+
+template <typename Key_T, typename Mapped_T>
+bool operator==(const typename cs540::Map<Key_T, Mapped_T>::Iterator &first,
+                const typename cs540::Map<Key_T, Mapped_T>::Iterator &second);
+template <typename Key_T, typename Mapped_T>
+bool operator==(const typename cs540::Map<Key_T, Mapped_T>::ConstIterator &first,
+				const typename cs540::Map<Key_T, Mapped_T>::ConstIterator &second);
+template <typename Key_T, typename Mapped_T>
+bool operator==(const typename cs540::Map<Key_T, Mapped_T>::Iterator &first,
+				const typename cs540::Map<Key_T, Mapped_T>::ConstIterator &second);
+template <typename Key_T, typename Mapped_T>
+bool operator==(const typename cs540::Map<Key_T, Mapped_T>::ConstIterator &first,
+				const typename cs540::Map<Key_T, Mapped_T>::Iterator &second);
+template <typename Key_T, typename Mapped_T>
+bool operator!=(const typename cs540::Map<Key_T, Mapped_T>::Iterator &first,
+                const typename cs540::Map<Key_T, Mapped_T>::Iterator &second);
+template <typename Key_T, typename Mapped_T>
+bool operator!=(const typename cs540::Map<Key_T, Mapped_T>::ConstIterator &first,
+				const typename cs540::Map<Key_T, Mapped_T>::ConstIterator &second);
+template <typename Key_T, typename Mapped_T>
+bool operator!=(const typename cs540::Map<Key_T, Mapped_T>::Iterator &first,
+				const typename cs540::Map<Key_T, Mapped_T>::ConstIterator &second);
+template <typename Key_T, typename Mapped_T>
+bool operator!=(const typename cs540::Map<Key_T, Mapped_T>::ConstIterator &first,
+				const typename cs540::Map<Key_T, Mapped_T>::Iterator &second);
+template <typename Key_T, typename Mapped_T>
+bool operator==(const typename cs540::Map<Key_T, Mapped_T>::ReverseIterator &first,
+				const typename cs540::Map<Key_T, Mapped_T>::ReverseIterator &second);
+template <typename Key_T, typename Mapped_T>
+bool operator!=(const typename cs540::Map<Key_T, Mapped_T>::ReverseIterator &first,
+				const typename cs540::Map<Key_T, Mapped_T>::ReverseIterator &second);
 
 #endif
