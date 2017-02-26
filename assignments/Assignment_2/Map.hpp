@@ -1,9 +1,11 @@
+#include <cassert>
+#include <cstdlib>
+#include <ctime>
 #include <iostream>
 #include <string>
-#include <cassert>
 #include <utility>
 #include <initializer_list>
-#include <cstdlib>
+#include <vector>
 
 #ifndef CS350_MAP_HPP_
 #define CS350_MAP_HPP_
@@ -12,9 +14,28 @@ namespace cs540 {
   template <typename Key_T, typename Mapped_T>
   class Map {
    private:
-  
+	
+	class Node {
+	 public:
+	  Key_T key_;
+	  Mapped_T value_;
+	  Node *next_;
+	  Node *prev_;
+	  Node *down_;
+	  Node(Key_T key, Mapped_T value) : key_(key), value_(value) {
+		next_ = nullptr;
+		prev_ = nullptr;
+		down_ = nullptr;
+	  }
+	  ~Node() {
+		if(next_ != nullptr) delete next_;
+	  }
+	};
+	std::vector<Node*> skip_list_;
+	size_t size_;
    public:
 	typedef std::pair<const Key_T, Mapped_T> ValueType;
+	
 	class Iterator {
 	 private:
 	  
@@ -63,16 +84,21 @@ namespace cs540 {
 	/*
 	  Ctors, assignment, dtor
 	 */
-	Map();
-	Map(const Map &other);
-	Map &operator=(const Map &other);
+	Map() : skip_list_() { size_ = 0; };
+	Map(const Map &other) {
+	  size_ = other.size_;
+	}
+	Map &operator=(const Map &other) {
+	  skip_list_.clear();
+	  size_ = other.size_;
+	}
 	Map(std::initializer_list<std::pair<const Key_T, Mapped_T>>);
 	~Map();
 	/*
 	  Size
 	 */	
-	size_t size() const;
-	bool empty() const;
+	size_t size() const { return size_; }
+	bool empty() const { return size() == 0; }
 	/*
 	  Iterator
 	 */
@@ -93,7 +119,10 @@ namespace cs540 {
 	/*
 	  Modifier
 	 */
-	std::pair<Iterator, bool> insert(const ValueType &value);
+	std::pair<Iterator, bool> insert(const ValueType &value) {
+	  Node *element = new Node(value.first, value.second);
+	  
+	}
 
 	template <typename IT_T>
 	void insert(IT_T range_beg, IT_T range_end);
@@ -105,6 +134,8 @@ namespace cs540 {
 	*/
   };
 }
+
+
 
 template <typename Key_T, typename Mapped_T>
 bool operator==(const cs540::Map<Key_T, Mapped_T> &first, const cs540::Map<Key_T, Mapped_T> &second);
