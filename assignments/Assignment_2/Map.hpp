@@ -43,21 +43,28 @@ namespace cs540 {
 	  return levels;
 	};
 
-	void insert_node(Node *element, Node *current_element, int current_level) {
+	bool insert_node(Node *element, Node *current_element, int current_level) {
+	  if (element->key_ == current_element->key_) return false;
 	  if (element->key_ < current_element->key_) {
 		// Insert_Node element before current_element
 		if (current_element == skip_list_[current_level]) {
 		  // Insert_Nodeing at head
-		  if(current_level != 0) 
-			insert_node(element, skip_list_[current_level - 1], current_level - 1);
+		  if (current_level != 0) {
+			if (!insert_node(element, skip_list_[current_level - 1], current_level - 1)) {
+			  return false;
+			}
+		  }
 		  element->next_[current_level] = current_element;
 		  current_element->prev_[current_level] = element;
 		  assert(element->next_[current_level]->prev_[current_level] == element);
 		  skip_list_[current_level] = element;
 		} else {
 		  // Insert_Nodeing not at head
-		  if(current_level != 0) 
-			insert_node(element, current_element->prev_[current_level], current_level - 1);
+		  if (current_level != 0) {
+			if (!insert_node(element, current_element->prev_[current_level], current_level - 1)) {
+			  return false;
+			}
+		  }
 		  element->next_[current_level] = current_element;
 		  element->prev_[current_level] = current_element->prev_[current_level];
 		  current_element->prev_[current_level]->next_[current_level] = element;
@@ -69,13 +76,19 @@ namespace cs540 {
 		// Insert_Node element after current_element
 		if (current_element->next_[current_level] == nullptr) {
 		  // Next is null
+		  if (current_level != 0) {
+			if (!insert_node(element, current_element, current_level - 1)) {
+			  return false;
+			}
+		  }
 		  current_element->next_[current_level] = element;
-		  if(current_level != 0)
-			insert_node(element, current_element, current_level - 1);
 		} else {
-		  insert_node(element, current_element->next_[current_level], current_level);
+		  if (!insert_node(element, current_element->next_[current_level], current_level)) {
+			return false;
+		  }
 		}
 	  }
+	  return true;
 	};
 
 	void print_map() {
@@ -102,15 +115,35 @@ namespace cs540 {
 	}
 	class Iterator {
 	 private:
-	  
+	  Node *node_;
+	  Iterator() {
+		*node_ = nullptr;
+	  }
+	  Iterator(Node *other_node) {
+		node_ = other_node;
+	  }
 	 public:
 	  Iterator(const Iterator &other); // Implicit should be ok
 	  ~Iterator(); // Implicit should be ok
 	  Iterator &operator=(const Iterator &other); // Implicit should be ok
-	  Iterator &operator++();
-	  Iterator operator++(int);
-	  Iterator &operator--();
-	  Iterator operator--(int);
+	  Iterator &operator++() {
+		node_ = node_->next_[0];
+		return *this;
+	  };
+	  Iterator operator++(int) {
+		Iterator it(*this);
+		node_ = node_->next_[0];
+		return it;
+	  };
+	  Iterator &operator--() {
+		node_ = node_->prev_[0];
+		return *this;
+	  };
+	  Iterator operator--(int) {
+		Iterator it(*this);
+		node_ = node_->prev_[0];
+		return it;
+	  };
 	  ValueType &operator*() const;
 	  ValueType *operator->() const;
 	};
@@ -186,7 +219,7 @@ namespace cs540 {
 	  Modifier
 	 */
 	// std::pair<Iterator, bool> insert(const ValueType &value) {
-	void insert(const ValueType &value) {
+	bool insert(const ValueType &value) {
 	  ++ size_;
 	  double rand_dbl = dist_(gen_);
 	  size_t num_levels = get_number_levels(rand_dbl);
@@ -197,15 +230,18 @@ namespace cs540 {
 		// Initial inserts
 		while (skip_list_.size() < num_levels + 1) {
 		  skip_list_.push_back(element);
-		}
+		}		
 	  } else {
 		size_t min_index = std::min((size_t)skip_list_.size() - 1, num_levels);
 		std::cout << "Min_index: " << min_index << std::endl;
-		insert_node(element, skip_list_[min_index], min_index);
+		if (!insert_node(element, skip_list_[min_index], min_index)) {
+		  return false;
+		}
 		while (skip_list_.size() < num_levels + 1) {
 		  skip_list_.push_back(element);
 		}		
-	  }  
+	  }
+	  return true;
 	}
 	
 	template <typename IT_T>
