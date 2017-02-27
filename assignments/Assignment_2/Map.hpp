@@ -8,6 +8,7 @@
 #include <vector>
 #include <array>
 #include <random>
+#include <algorithm>
 
 #ifndef CS440_MAP_HPP_
 #define CS440_MAP_HPP_
@@ -23,7 +24,9 @@ namespace cs540 {
 	  Mapped_T value_;	  
 	  std::vector<Node *> next_;
 	  std::vector<Node *> prev_;
-	  Node(Key_T key, Mapped_T value) : key_(key), value_(value), next_(), prev_() { };
+	  Node(Key_T key, Mapped_T value, size_t num_levels)
+		: key_(key), value_(value), next_(num_levels + 1, nullptr),
+		  prev_(num_levels + 1, nullptr){};
 	  ~Node() {
 		if (next_.size() != 0) {
 		  delete next_[0];
@@ -31,8 +34,8 @@ namespace cs540 {
 	  }
 	};
 	
-	int get_number_levels(double rand_dbl) {
-	  int levels = 0;
+	size_t get_number_levels(double rand_dbl) {
+	  size_t levels = 0;
 	  while (rand_dbl < 0.5) {
 		++ levels;
 		rand_dbl = rand_dbl * 2;
@@ -40,9 +43,52 @@ namespace cs540 {
 	  return levels;
 	};
 
-	void insert(Node *element, int current_level) {
-	  
+	void insert_node(Node *element, Node *current_element, int current_level) {
+	  if (element->key_ < current_element->key_) {
+		// Insert_Node element before current_element
+		if (current_element == skip_list_[current_level]) {
+		  // Insert_Nodeing at head
+		  if(current_level != 0) 
+			insert_node(element, skip_list_[current_level - 1], current_level - 1);
+		  element->next_[current_level] = current_element;
+		  current_element->prev_[current_level] = element;
+		  assert(element->next_[current_level]->prev_[current_level] == element);
+		  skip_list_[current_level] = element;
+		} else {
+		  // Insert_Nodeing not at head
+		  if(current_level != 0) 
+			insert_node(element, current_element->prev_[current_level], current_level - 1);
+		  element->next_[current_level] = current_element;
+		  element->prev_[current_level] = current_element->prev_[current_level];
+		  current_element->prev_[current_level]->next_[current_level] = element;
+		  current_element->prev_[current_level] = element;
+		  assert(element->next_[current_level]->prev_[current_level] == element);
+		  assert(element->prev_[current_level]->next_[current_level] == element);
+		}
+	  } else {
+		// Insert_Node element after current_element
+		if (current_element->next_[current_level] == nullptr) {
+		  // Next is null
+		  current_element->next_[current_level] = element;
+		  if(current_level != 0)
+			insert_node(element, current_element, current_level - 1);
+		} else {
+		  insert_node(element, current_element->next_[current_level], current_level);
+		}
+	  }
 	};
+
+	void print_map() {
+	  for (int i = skip_list_.size() - 1; i >=0 ; -- i) {
+		std::cout << "Level: " << i << std::endl;
+		Node *head = skip_list_[i];
+		while (head != nullptr) {
+		  std::cout << head->key_ << " ";
+		  head = head->next_[i];
+		}
+		std::cout << std::endl;
+	  }
+	}
 	
 	std::vector<Node*> skip_list_;
 	size_t size_;
@@ -51,7 +97,9 @@ namespace cs540 {
 	std::uniform_real_distribution<double> dist_;
    public:
 	typedef std::pair<const Key_T, Mapped_T> ValueType;
-	
+	void print() {
+	  print_map();
+	}
 	class Iterator {
 	 private:
 	  
@@ -109,7 +157,9 @@ namespace cs540 {
 	  size_ = other.size_;
 	}
 	Map(std::initializer_list<std::pair<const Key_T, Mapped_T>>);
-	~Map();
+	~Map() {
+	  delete skip_list_[0];
+	}
 	/*
 	  Size
 	 */	
@@ -135,14 +185,27 @@ namespace cs540 {
 	/*
 	  Modifier
 	 */
-	std::pair<Iterator, bool> insert(const ValueType &value) {
-	  Node *element = new Node(value.first, value.second);
+	// std::pair<Iterator, bool> insert(const ValueType &value) {
+	void insert(const ValueType &value) {
+	  ++ size_;
 	  double rand_dbl = dist_(gen_);
-	  int num_levels = get_number_levels(rand_dbl);
-	  insert(element, skip_list_.size() - 1);
-	  while (skip_list_.size() < num_levels + 1) {
-		skip_list_.push_back(element);
-	  }
+	  size_t num_levels = get_number_levels(rand_dbl);
+	  std::cout << "Rand_dbl: " << rand_dbl << std::endl;
+	  std::cout << "num_levels: " << num_levels << std::endl;
+	  Node *element = new Node(value.first, value.second, num_levels);
+	  if (skip_list_.size() == 0) {
+		// Initial inserts
+		while (skip_list_.size() < num_levels + 1) {
+		  skip_list_.push_back(element);
+		}
+	  } else {
+		size_t min_index = std::min((size_t)skip_list_.size() - 1, num_levels);
+		std::cout << "Min_index: " << min_index << std::endl;
+		insert_node(element, skip_list_[min_index], min_index);
+		while (skip_list_.size() < num_levels + 1) {
+		  skip_list_.push_back(element);
+		}		
+	  }  
 	}
 	
 	template <typename IT_T>

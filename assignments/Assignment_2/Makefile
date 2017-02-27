@@ -1,5 +1,5 @@
 CC = g++
-CFLAGS = -g -O3 -std=c++14 -Wall -Wextra -pedantic
+CFLAGS = -g -std=c++14 -Wall -Wextra -pedantic
 LDFLAGS = -g
 
 test: test.o
@@ -7,6 +7,9 @@ test: test.o
 
 test.o: test.cpp Map.hpp
 	$(CC) $(CFLAGS) -c test.cpp
+
+gdb: test
+	gdb -x gdb_commands.txt ./test.exe
 
 clean:
 	rm *.o *.exe
