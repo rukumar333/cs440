@@ -6,33 +6,49 @@
 #include <utility>
 #include <initializer_list>
 #include <vector>
+#include <array>
+#include <random>
 
-#ifndef CS350_MAP_HPP_
-#define CS350_MAP_HPP_
+#ifndef CS440_MAP_HPP_
+#define CS440_MAP_HPP_
 
 namespace cs540 {
   template <typename Key_T, typename Mapped_T>
   class Map {
    private:
-	
+
 	class Node {
 	 public:
 	  Key_T key_;
-	  Mapped_T value_;
-	  Node *next_;
-	  Node *prev_;
-	  Node *down_;
-	  Node(Key_T key, Mapped_T value) : key_(key), value_(value) {
-		next_ = nullptr;
-		prev_ = nullptr;
-		down_ = nullptr;
-	  }
+	  Mapped_T value_;	  
+	  std::vector<Node *> next_;
+	  std::vector<Node *> prev_;
+	  Node(Key_T key, Mapped_T value) : key_(key), value_(value), next_(), prev_() { };
 	  ~Node() {
-		if(next_ != nullptr) delete next_;
+		if (next_.size() != 0) {
+		  delete next_[0];
+		}
 	  }
 	};
+	
+	int get_number_levels(double rand_dbl) {
+	  int levels = 0;
+	  while (rand_dbl < 0.5) {
+		++ levels;
+		rand_dbl = rand_dbl * 2;
+	  }
+	  return levels;
+	};
+
+	void insert(Node *element, int current_level) {
+	  
+	};
+	
 	std::vector<Node*> skip_list_;
 	size_t size_;
+	std::random_device rand_dev_;
+	std::mt19937_64 gen_;
+	std::uniform_real_distribution<double> dist_;
    public:
 	typedef std::pair<const Key_T, Mapped_T> ValueType;
 	
@@ -84,7 +100,7 @@ namespace cs540 {
 	/*
 	  Ctors, assignment, dtor
 	 */
-	Map() : skip_list_() { size_ = 0; };
+	Map() : skip_list_() , gen_(rand_dev_()), dist_(0.0, 1.0) { size_ = 0; };
 	Map(const Map &other) {
 	  size_ = other.size_;
 	}
@@ -121,9 +137,14 @@ namespace cs540 {
 	 */
 	std::pair<Iterator, bool> insert(const ValueType &value) {
 	  Node *element = new Node(value.first, value.second);
-	  
+	  double rand_dbl = dist_(gen_);
+	  int num_levels = get_number_levels(rand_dbl);
+	  insert(element, skip_list_.size() - 1);
+	  while (skip_list_.size() < num_levels + 1) {
+		skip_list_.push_back(element);
+	  }
 	}
-
+	
 	template <typename IT_T>
 	void insert(IT_T range_beg, IT_T range_end);
 	void erase(Iterator pos);
@@ -135,44 +156,53 @@ namespace cs540 {
   };
 }
 
-
-
 template <typename Key_T, typename Mapped_T>
-bool operator==(const cs540::Map<Key_T, Mapped_T> &first, const cs540::Map<Key_T, Mapped_T> &second);
+bool operator==(const cs540::Map<Key_T, Mapped_T> &first,
+                const cs540::Map<Key_T, Mapped_T> &second);
 template <typename Key_T, typename Mapped_T>
-bool operator!=(const cs540::Map<Key_T, Mapped_T> &first, const cs540::Map<Key_T, Mapped_T> &second);
+bool operator!=(const cs540::Map<Key_T, Mapped_T> &first,
+                const cs540::Map<Key_T, Mapped_T> &second);
 template <typename Key_T, typename Mapped_T>
-bool operator<(const cs540::Map<Key_T, Mapped_T> &first, const cs540::Map<Key_T, Mapped_T> &second);
+bool operator<(const cs540::Map<Key_T, Mapped_T> &first,
+               const cs540::Map<Key_T, Mapped_T> &second);
 
 template <typename Key_T, typename Mapped_T>
 bool operator==(const typename cs540::Map<Key_T, Mapped_T>::Iterator &first,
                 const typename cs540::Map<Key_T, Mapped_T>::Iterator &second);
 template <typename Key_T, typename Mapped_T>
-bool operator==(const typename cs540::Map<Key_T, Mapped_T>::ConstIterator &first,
-				const typename cs540::Map<Key_T, Mapped_T>::ConstIterator &second);
+bool operator==(
+    const typename cs540::Map<Key_T, Mapped_T>::ConstIterator &first,
+    const typename cs540::Map<Key_T, Mapped_T>::ConstIterator &second);
 template <typename Key_T, typename Mapped_T>
-bool operator==(const typename cs540::Map<Key_T, Mapped_T>::Iterator &first,
-				const typename cs540::Map<Key_T, Mapped_T>::ConstIterator &second);
+bool operator==(
+    const typename cs540::Map<Key_T, Mapped_T>::Iterator &first,
+    const typename cs540::Map<Key_T, Mapped_T>::ConstIterator &second);
 template <typename Key_T, typename Mapped_T>
-bool operator==(const typename cs540::Map<Key_T, Mapped_T>::ConstIterator &first,
-				const typename cs540::Map<Key_T, Mapped_T>::Iterator &second);
+bool operator==(
+    const typename cs540::Map<Key_T, Mapped_T>::ConstIterator &first,
+    const typename cs540::Map<Key_T, Mapped_T>::Iterator &second);
 template <typename Key_T, typename Mapped_T>
 bool operator!=(const typename cs540::Map<Key_T, Mapped_T>::Iterator &first,
                 const typename cs540::Map<Key_T, Mapped_T>::Iterator &second);
 template <typename Key_T, typename Mapped_T>
-bool operator!=(const typename cs540::Map<Key_T, Mapped_T>::ConstIterator &first,
-				const typename cs540::Map<Key_T, Mapped_T>::ConstIterator &second);
+bool operator!=(
+    const typename cs540::Map<Key_T, Mapped_T>::ConstIterator &first,
+    const typename cs540::Map<Key_T, Mapped_T>::ConstIterator &second);
 template <typename Key_T, typename Mapped_T>
-bool operator!=(const typename cs540::Map<Key_T, Mapped_T>::Iterator &first,
-				const typename cs540::Map<Key_T, Mapped_T>::ConstIterator &second);
+bool operator!=(
+    const typename cs540::Map<Key_T, Mapped_T>::Iterator &first,
+    const typename cs540::Map<Key_T, Mapped_T>::ConstIterator &second);
 template <typename Key_T, typename Mapped_T>
-bool operator!=(const typename cs540::Map<Key_T, Mapped_T>::ConstIterator &first,
-				const typename cs540::Map<Key_T, Mapped_T>::Iterator &second);
+bool operator!=(
+    const typename cs540::Map<Key_T, Mapped_T>::ConstIterator &first,
+    const typename cs540::Map<Key_T, Mapped_T>::Iterator &second);
 template <typename Key_T, typename Mapped_T>
-bool operator==(const typename cs540::Map<Key_T, Mapped_T>::ReverseIterator &first,
-				const typename cs540::Map<Key_T, Mapped_T>::ReverseIterator &second);
+bool operator==(
+    const typename cs540::Map<Key_T, Mapped_T>::ReverseIterator &first,
+    const typename cs540::Map<Key_T, Mapped_T>::ReverseIterator &second);
 template <typename Key_T, typename Mapped_T>
-bool operator!=(const typename cs540::Map<Key_T, Mapped_T>::ReverseIterator &first,
-				const typename cs540::Map<Key_T, Mapped_T>::ReverseIterator &second);
+bool operator!=(
+    const typename cs540::Map<Key_T, Mapped_T>::ReverseIterator &first,
+    const typename cs540::Map<Key_T, Mapped_T>::ReverseIterator &second);
 
 #endif
