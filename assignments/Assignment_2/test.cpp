@@ -6,21 +6,23 @@
 
 void my_map_test() {
   const cs540::Map<int, int> map;
-  // map.insert(std::make_pair(0, 1));
-  // map.insert(std::make_pair(-1, 1));
-  // map.insert(std::make_pair(2, 1));
-  // map.insert(std::make_pair(10, 1));
+  map.insert(std::make_pair(0, 1));
+  map.insert(std::make_pair(-1, 1));
+  map.insert(std::make_pair(2, 1));
+  map.insert(std::make_pair(10, 1));
   // map.print();
-  // std::cout << "Erasing key: 2\n" << std::endl;
-  // map.erase(2);
+  std::cout << "Erasing key: 2\n" << std::endl;
+  map.erase(2);
   // map.print();
-  cs540::Map<int, int>::ConstIterator it = map.begin();
+  cs540::Map<int, int>::Iterator it = map.begin();
   // cs540::Map<int, int>::ConstIterator end = map.end();
   // while (it == map.end()) {
-  // while (it != map.end()) {
-  // 	std::cout << it->first << ", " << it->second << std::endl;
-  // 	++ it;
-  // }
+  while (it != map.end()) {
+  	std::cout << it->first << ", " << it->second << std::endl;
+	++ it->second;
+  	++ it;
+  }
+  it = map.begin();
 }
 
 int main() {

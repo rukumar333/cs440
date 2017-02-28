@@ -90,100 +90,69 @@ namespace cs540 {
 	  print_map();
 	}
 
-	class Iterator {
+	class Iterator : public ConstIterator{
 	  friend class Map;
 	  friend class ConstIterator;
-	  friend bool operator==(const Iterator first, const Iterator second);
-	  // friend bool operator==(const ConstIterator first, const Iterator second);
-	  // friend bool operator==(const Iterator first, const ConstIterator second);
-	  friend bool operator!=(const Iterator first, const Iterator second);
-	  // friend bool operator!=(const ConstIterator first, const Iterator second);
-	  // friend bool operator!=(const Iterator first, const ConstIterator second);
-	 public:
-	  Node *node_;
+	 private:
 	  Iterator() {
-		node_ = nullptr;
+	  	this->node_ = nullptr;
 	  }
 	  Iterator(Node *other_node) {
-		node_ = other_node;
+	  	this->node_ = other_node;
 	  }
 	 public:
-	  Iterator &operator++() {
-		node_ = node_->next_[0];
-		return *this;
-	  }
-	  Iterator operator++(int) {
-		Iterator it(*this);
-		node_ = node_->next_[0];
-		return it;
-	  }
-	  Iterator &operator--() {
-		node_ = node_->prev_[0];
-		return *this;
-	  }
-	  Iterator operator--(int) {
-		Iterator it(*this);
-		node_ = node_->prev_[0];
-		return it;
-	  }
 	  ValueType &operator*() const {
-		return node_->pair_val_;
+		return this->node_->pair_val_;
 	  }
 	  ValueType *operator->() const {
-		return &(node_->pair_val_);
+		return &(this->node_->pair_val_);
 	  }
 	};
 
-	class ConstIterator : public Iterator{
+	class ConstIterator{
 	  friend class Map;
 	  friend class Iterator;
-	  // friend bool operator==(const ConstIterator first, const ConstIterator second);
-	  // friend bool operator!=(const Iterator first, const CosIterator second);
-	  // friend bool operator==(const ConstIterator first, const Iterator second);
-	  // friend bool operator==(const Iterator first, const ConstIterator second);
-	  // friend bool operator!=(const ConstIterator first, const Iterator second);
-	  // friend bool operator!=(const Iterator first, const ConstIterator second);
-	 private:
-	  // Node *node_;
-	  // ConstIterator() {
-	  // 	node_ = nullptr;
-	  // }
-	  // ConstIterator(Node *other_node) {
-	  // 	node_ = other_node;
-	  // }
-	  // ValueType &operator*() const {
-	  // 	return node_->pair_val_;
-	  // }
-	  // ValueType *operator->() const {
-	  // 	return &(node_->pair_val_);
-	  // }	  
+	 protected:
+	  Node *node_;
+	  ConstIterator() {
+	  	node_ = nullptr;
+	  }
+	  ConstIterator(Node *other_node) {
+	  	node_ = other_node;
+	  }
 	 public:
-	  // ConstIterator(const Iterator &other) {
-	  // 	this->node_ = other.node_;
-	  // }
-	  // ConstIterator &operator++() {
-	  // 	node_ = node_->next_[0];
-	  // 	return *this;
-	  // }
-	  // ConstIterator operator++(int) {
-	  // 	ConstIterator it(*this);
-	  // 	node_ = node_->next_[0];
-	  // 	return it;
-	  // }
-	  // ConstIterator &operator--() {
-	  // 	node_ = node_->prev_[0];
-	  // 	return *this;		
-	  // }
-	  // ConstIterator operator--(int) {
-	  // 	ConstIterator it(*this);
-	  // 	node_ = node_->prev_[0];
-	  // 	return it;		
-	  // }
+	  ConstIterator(const Iterator &other) {
+	  	this->node_ = other.node_;
+	  }
+	  ConstIterator &operator++() {
+	  	node_ = node_->next_[0];
+	  	return *this;
+	  }
+	  ConstIterator operator++(int) {
+	  	ConstIterator it(*this);
+	  	node_ = node_->next_[0];
+	  	return it;
+	  }
+	  ConstIterator &operator--() {
+	  	node_ = node_->prev_[0];
+	  	return *this;		
+	  }
+	  ConstIterator operator--(int) {
+	  	ConstIterator it(*this);
+	  	node_ = node_->prev_[0];
+	  	return it;		
+	  }
 	  const ValueType &operator*() const {
 		return node_->pair_val_;
 	  }
 	  const ValueType *operator->() const {
 		return &(node_->pair_val_);
+	  }
+	  friend bool operator==(const ConstIterator first, const ConstIterator second) {
+		return first.node_ == second.node_;
+	  }
+	  friend bool operator!=(const ConstIterator first, const ConstIterator second) {
+		return first.node_ != second.node_;
 	  }
 	};
 
@@ -222,35 +191,14 @@ namespace cs540 {
 	  ValueType *operator->() const {
 		return &(node_->pair_val_);
 	  }
+	  friend bool operator==(const ReverseIterator first, const ReverseIterator second) {
+		return first.node_ == second.node_;
+	  }
+	  friend bool operator!=(const ReverseIterator first, const ReverseIterator second) {
+		return first.node_ != second.node_;
+	  }
 	};
-
-	/*
-	  Iterator comparators
-	*/
-	friend bool operator==(const Iterator first, const Iterator second) {
-	  return first.node_ == second.node_;
-	}
-	friend bool operator!=(const Iterator first, const Iterator second) {
-	  return first.node_ != second.node_;
-	}
-	// friend bool operator==(const ConstIterator first, const ConstIterator second) {
-	//   return first.node_ == second.node_;
-	// }
-	// friend bool operator!=(const ConstIterator first, const ConstIterator second) {
-	//   return first.node_ != second.node_;
-	// }
-	// friend bool operator==(const ConstIterator first, const Iterator second) {
-	//   return first.node_ == second.node_;
-	// }
-	// friend bool operator!=(const ConstIterator first, const Iterator second) {
-	//   return first.node_ != second.node_;
-	// }
-	// friend bool operator==(const Iterator first, const ConstIterator second) {
-	//   return first.node_ == second.node_;
-	// }
-	// friend bool operator!=(const Iterator first, const ConstIterator second) {
-	//   return first.node_ != second.node_;
-	// }
+	
 	/*
 	  Ctors, assignment, dtor
 	 */
