@@ -27,7 +27,7 @@ namespace cs540 {
 	  std::vector<Node *> prev_;
 	  Node(Key_T key, Mapped_T value, size_t num_levels)
 		: pair_val_(key, value), next_(num_levels + 1, nullptr),
-		  prev_(num_levels + 1, nullptr){};
+		  prev_(num_levels + 1, nullptr){}
 	  ~Node() {
 		if (next_.size() != 0) {
 		  delete next_[0];
@@ -42,7 +42,7 @@ namespace cs540 {
 		rand_dbl = rand_dbl * 2;
 	  }
 	  return levels;
-	};
+	}
 
 	bool insert_node(Node *element, Node *current_element, int current_level) {
 	  if (element->pair_val_.first == current_element->pair_val_.first) return false;
@@ -90,7 +90,7 @@ namespace cs540 {
 		}
 	  }
 	  return true;
-	};
+	}
 
 	void print_map() {
 	  for (int i = skip_list_.size() - 1; i >=0 ; -- i) {
@@ -114,6 +114,7 @@ namespace cs540 {
 	void print() {
 	  print_map();
 	}
+	
 	class Iterator {
 	  friend class Map;
 	  friend class ConstIterator;
@@ -121,10 +122,10 @@ namespace cs540 {
 	  Node *node_;
 	  Iterator() {
 		*node_ = nullptr;
-	  };
+	  }
 	  Iterator(Node *other_node) {
 		node_ = other_node;
-	  };
+	  }
 	 public:
 	  // Iterator(const Iterator &other); // Implicit should be ok
 	  // ~Iterator(); // Implicit should be ok
@@ -132,27 +133,27 @@ namespace cs540 {
 	  Iterator &operator++() {
 		node_ = node_->next_[0];
 		return *this;
-	  };
+	  }
 	  Iterator operator++(int) {
 		Iterator it(*this);
 		node_ = node_->next_[0];
 		return it;
-	  };
+	  }
 	  Iterator &operator--() {
 		node_ = node_->prev_[0];
 		return *this;
-	  };
+	  }
 	  Iterator operator--(int) {
 		Iterator it(*this);
 		node_ = node_->prev_[0];
 		return it;
-	  };
+	  }
 	  ValueType &operator*() const {
 		return node_->pair_val_;
-	  };
+	  }
 	  ValueType *operator->() const {
 		return &(node_->pair_val_);
-	  };
+	  }
 	};
 
 	class ConstIterator {
@@ -162,6 +163,9 @@ namespace cs540 {
 	  ConstIterator() {
 		node_ = nullptr;
 	  }
+	  ConstIterator(Node *other_node) {
+		node_ = other_node;
+	  }
 	 public:
 	  // ConstIterator(const ConstIterator &other); // Implicit should be ok
 	  ConstIterator(const Iterator &other) {
@@ -169,32 +173,75 @@ namespace cs540 {
 	  }
 	  // ~ConstIterator(); // Implicit should be ok
 	  // ConstIterator &operator=(const ConstIterator &other); // Implicit should be ok
-	  ConstIterator &operator++();
-	  ConstIterator operator++(int);
-	  ConstIterator &operator--();
-	  ConstIterator operator--(int);
-	  const ValueType &operator*() const;
-	  const ValueType *operator->() const;	
+	  ConstIterator &operator++() {
+		node_ = node_->next_[0];
+		return *this;
+	  }
+	  ConstIterator operator++(int) {
+		ConstIterator it(*this);
+		node_ = node_->next_[0];
+		return it;
+	  }
+	  ConstIterator &operator--() {
+		node_ = node_->prev_[0];
+		return *this;		
+	  }
+	  ConstIterator operator--(int) {
+		ConstIterator it(*this);
+		node_ = node_->prev_[0];
+		return it;		
+	  }
+	  const ValueType &operator*() const {
+		return node_->pair_val_;
+	  }
+	  const ValueType *operator->() const {
+		return &(node_->pair_val_);
+	  }
 	};
 
 	class ReverseIterator {
+	  friend class Map;
 	 private:
-
+	  Node *node_;
+	  ReverseIterator() {
+		node_ = nullptr;
+	  }
+	  ReverseIterator(Node *other_node) {
+		node_ = other_node;
+	  }
 	 public:
-	  ReverseIterator(const ReverseIterator &other); // Implicit should be ok
-	  ~ReverseIterator(); // Implicit should be ok
-	  ReverseIterator &operator=(const ReverseIterator &other); // Implicit should be ok
-	  ReverseIterator &operator++();
-	  ReverseIterator operator++(int);
-	  ReverseIterator &operator--();
-	  ReverseIterator operator--(int);
-	  ValueType &operator*() const;
-	  ValueType *operator->() const;	
+	  // ReverseIterator(const ReverseIterator &other); // Implicit should be ok
+	  // ~ReverseIterator(); // Implicit should be ok
+	  // ReverseIterator &operator=(const ReverseIterator &other); // Implicit should be ok
+	  ReverseIterator &operator++() {
+		node_ = node_->prev_[0];
+		return *this;
+	  }
+	  ReverseIterator operator++(int) {
+		ReverseIterator it(*this);
+		node_ = node_->next_[0];
+		return it;
+	  }
+	  ReverseIterator &operator--() {
+		node_ = node_->next_[0];
+		return *this;		
+	  }
+	  ReverseIterator operator--(int) {
+		ReverseIterator it(*this);
+		node_ = node_->prev_[0];
+		return it;		
+	  }
+	  ValueType &operator*() const {
+		return node_->pair_val_;		
+	  }
+	  ValueType *operator->() const {
+		return &(node_->pair_val_);
+	  }
 	};
 	/*
 	  Ctors, assignment, dtor
 	 */
-	Map() : skip_list_() , gen_(rand_dev_()), dist_(0.0, 1.0) { size_ = 0; };
+	Map() : skip_list_() , gen_(rand_dev_()), dist_(0.0, 1.0) { size_ = 0; }
 	Map(const Map &other) {
 	  size_ = other.size_;
 	}
@@ -217,15 +264,24 @@ namespace cs540 {
 	 */
 	Iterator begin() {
 	  if(skip_list_.size() > 0) return Iterator(skip_list_[0]);
-	  else return Iterator(nullptr);
-	};
-	Iterator end() {
-	  return Iterator(nullptr);
+	  else return Iterator();
 	}
-	ConstIterator begin() const;
-	ConstIterator end() const;
-	ReverseIterator rbegin();
-	ReverseIterator rend();
+	Iterator end() {
+	  return Iterator();
+	}
+	ConstIterator begin() const {
+	  if(skip_list_.size() > 0) return ConstIterator(skip_list_[0]);
+	  else return ConstIterator();	  
+	}
+	ConstIterator end() const {
+	  return ConstIterator();
+	}
+	ReverseIterator rbegin() {
+	  
+	}
+	ReverseIterator rend() {
+	  
+	}
 	/*
 	  Element Access
 	 */
@@ -261,7 +317,7 @@ namespace cs540 {
 		}		
 	  }
 	  return std::make_pair(Iterator(element), true);
-	};
+	}
 	
 	template <typename IT_T>
 	void insert(IT_T range_beg, IT_T range_end);
