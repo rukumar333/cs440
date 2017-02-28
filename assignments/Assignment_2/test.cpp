@@ -19,4 +19,6 @@ int main() {
   map.insert(std::make_pair(10, 1));
   std::cout << map.insert(std::make_pair(10, 1)).second << std::endl;
   map.print();
+  map.erase(10);
+  map.print();
 }

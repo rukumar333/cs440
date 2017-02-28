@@ -102,6 +102,10 @@ namespace cs540 {
 	  return true;
 	}
 
+	Node *find_node(const Key_T &key) {
+	  return find_node(key, skip_list_.back(), skip_list_.size() - 1);
+	}
+
 	Node *find_node(const Key_T &key, Node *current_element, size_t current_level) {
 	  if (key == current_element->pair_val_.first) return current_element;
 	  if (key < current_element->pair_val_.first) {
@@ -337,21 +341,21 @@ namespace cs540 {
 	  if (skip_list_.size() == 0) {
 		return end();
 	  } else {
-		return Iterator(find_node(key, skip_list_.back(), skip_list_.size() - 1));
+		return Iterator(find_node(key));
 	  }
 	}
 	ConstIterator find(const Key_T &key) const {
 	  if (skip_list_.size() == 0) {
 		return end();
 	  } else {
-		return ConstIterator(find_node(key, skip_list_.back(), skip_list_.size() - 1));
+		return ConstIterator(find_node(key));
 	  }	  
 	}
 	Mapped_T &at(const Key_T &key) {
 	  if (skip_list_.size() == 0) {
 		throw std::out_of_range("Map is empty");
 	  } else {
-		Node *ptr = find_node(key, skip_list_.back(), skip_list_.size() - 1);
+		Node *ptr = find_node(key);
 		if (ptr != nullptr) {
 		  return ptr->pair_val_.second;
 		} else {
@@ -363,7 +367,7 @@ namespace cs540 {
 	  if (skip_list_.size() == 0) {
 		throw std::out_of_range("Map is empty");
 	  } else {
-		Node *ptr = find_node(key, skip_list_.back(), skip_list_.size() - 1);
+		Node *ptr = find_node(key);
 		if (ptr != nullptr) {
 		  return ptr->pair_val_.second;
 		} else {
@@ -376,7 +380,7 @@ namespace cs540 {
 	  if (skip_list_.size() == 0) {
 		need_to_insert = true;
 	  }
-	  Node *ptr = find_node(key, skip_list_.back(), skip_list_.size() - 1);
+	  Node *ptr = find_node(key);
 	  if (ptr == nullptr) {
 		need_to_insert = true;
 	  } else {
@@ -416,13 +420,58 @@ namespace cs540 {
 		}		
 	  }
 	  return std::make_pair(Iterator(element), true);
-	}
-	
+	}	
 	template <typename IT_T>
-	void insert(IT_T range_beg, IT_T range_end);
-	void erase(Iterator pos);
-	void erase(const Key_T &key);
-	void clear();
+	void insert(IT_T range_beg, IT_T range_end) {
+	  while (range_beg != range_end) {
+		insert(ValueType(*range_beg));
+		++ range_beg;
+	  }
+	}
+	void erase(Iterator pos) {
+	  if (pos.node_ != nullptr) {
+	  	Node *node = pos.node_;
+	  	for(unsigned int i = 0; i < node->prev_.size(); ++ i){
+	  	  if (node->next_[i] != nullptr) {
+	  	  	// Next is not null
+	  	  	if (node->prev_[i] != nullptr) {
+	  	  	  // Prev is not null
+	  	  	  node->prev_[i]->next_[i] = node->next_[i];
+			  node->next_[i]->prev_[i] = node->prev_[i];
+	  	  	} else {
+	  	  	  // Prev is null
+			  
+	  	  	}
+	  	  } else {
+	  	  	// Next is null
+	  	  	if (node->prev_[i] != nullptr) {
+	  	  	  // Prev is not null
+	  	  	} else {
+	  	  	  // Prev is null
+	  	  	}
+	  	  }
+	  	}
+		node->prev_.clear();
+		node->next_.clear();
+		delete node;
+	  }
+	}
+	void erase(const Key_T &key) {
+	  Node *ptr = find_node(key);
+	  if (ptr == nullptr) {
+		throw std::out_of_range("Key not located in map");
+	  } else {
+		erase(Iterator(ptr));
+	  }
+	}
+	void clear() {
+	  if (skip_list_.size() != 0) {
+		delete skip_list_[0];
+		skip_list_.clear();
+		size_ = 0;
+		end_.node_ = nullptr;
+	  }
+	}
 	/*
 	  Comparison
 	*/
