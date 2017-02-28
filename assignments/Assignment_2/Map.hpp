@@ -52,93 +52,12 @@ namespace cs540 {
 	  return levels;
 	}
 
-	bool insert_node(Node *element, Node *current_element, size_t current_level) {
-	  if (element->pair_val_.first == current_element->pair_val_.first) return false;
-	  if (element->pair_val_.first < current_element->pair_val_.first) {
-		// Insert_Node element before current_element
-		if (current_element == skip_list_[current_level]) {
-		  // Insert_Nodeing at head
-		  if (current_level != 0) {
-			if (!insert_node(element, skip_list_[current_level - 1], current_level - 1)) {
-			  return false;
-			}
-		  }
-		  element->next_[current_level] = current_element;
-		  current_element->prev_[current_level] = element;
-		  assert(element->next_[current_level]->prev_[current_level] == element);
-		  skip_list_[current_level] = element;
-		} else {
-		  // Insert_Nodeing not at head
-		  if (current_level != 0) {
-			if (!insert_node(element, current_element->prev_[current_level], current_level - 1)) {
-			  return false;
-			}
-		  }
-		  element->next_[current_level] = current_element;
-		  element->prev_[current_level] = current_element->prev_[current_level];
-		  current_element->prev_[current_level]->next_[current_level] = element;
-		  current_element->prev_[current_level] = element;
-		  assert(element->next_[current_level]->prev_[current_level] == element);
-		  assert(element->prev_[current_level]->next_[current_level] == element);
-		}
-	  } else {
-		// Insert_Node element after current_element
-		if (current_element->next_[current_level] == nullptr) {
-		  // Next is null
-		  if (current_level != 0) {
-			if (!insert_node(element, current_element, current_level - 1)) {
-			  return false;
-			}
-		  } else {
-			end_.node_ = element;
-		  }
-		  current_element->next_[current_level] = element;
-		} else {
-		  if (!insert_node(element, current_element->next_[current_level], current_level)) {
-			return false;
-		  }
-		}
-	  }
-	  return true;
-	}
-
+	bool insert_node(Node *element, Node *current_element, size_t current_level);
+	
 	Node *find_node(const Key_T &key) {
 	  return find_node(key, skip_list_.back(), skip_list_.size() - 1);
 	}
-
-	Node *find_node(const Key_T &key, Node *current_element, size_t current_level) {
-	  if (key == current_element->pair_val_.first) return current_element;
-	  if (key < current_element->pair_val_.first) {
-		// Searching element before current_element
-		if (current_element == skip_list_[current_level]) {
-		  // Searching at head
-		  if (current_level != 0) {
-			return find_node(key, skip_list_[current_level - 1], current_level - 1);
-		  } else {
-			return nullptr;
-		  }
-		} else {
-		  // Searching not at head
-		  if (current_level != 0) {
-			return find_node(key, current_element->prev_[current_level], current_level - 1);
-		  } else {
-			return nullptr;
-		  }
-		}
-	  } else {
-		// Search element after current_element
-		if (current_element->next_[current_level] == nullptr) {
-		  // Next is null
-		  if (current_level != 0) {
-			return find_node(key, current_element, current_level - 1);
-		  } else {
-			return nullptr;
-		  }
-		} else {
-		  return find_node(key, current_element->next_[current_level], current_level);
-		}
-	  }
-	}
+	Node *find_node(const Key_T &key, Node *current_element, size_t current_level);
 	
 	void print_map() {
 	  for (int i = skip_list_.size() - 1; i >=0 ; -- i) {
@@ -161,6 +80,7 @@ namespace cs540 {
 	std::mt19937_64 gen_;
 	std::uniform_real_distribution<double> dist_;
 	ReverseIterator end_;
+	
    public:
 	typedef std::pair<const Key_T, Mapped_T> ValueType;
 	void print() {
@@ -396,7 +316,6 @@ namespace cs540 {
 	  Modifier
 	 */
 	std::pair<Iterator, bool> insert(const ValueType &value) {
-	// bool insert(const ValueType &value) {
 	  ++ size_;
 	  double rand_dbl = dist_(gen_);
 	  size_t num_levels = get_number_levels(rand_dbl);
@@ -436,18 +355,26 @@ namespace cs540 {
 	  	  	// Next is not null
 	  	  	if (node->prev_[i] != nullptr) {
 	  	  	  // Prev is not null
+			  // std::cout << "Case 1" << std::endl;
 	  	  	  node->prev_[i]->next_[i] = node->next_[i];
 			  node->next_[i]->prev_[i] = node->prev_[i];
 	  	  	} else {
 	  	  	  // Prev is null
-			  
+			  // std::cout << "Case 2" << std::endl;
+			  skip_list_[i] = node->next_[i];
+			  node->next_[i]->prev_[i] = nullptr;
 	  	  	}
 	  	  } else {
 	  	  	// Next is null
 	  	  	if (node->prev_[i] != nullptr) {
 	  	  	  // Prev is not null
+			  // std::cout << "Case 3" << std::endl;
+			  node->prev_[i]->next_[i] = nullptr;
 	  	  	} else {
 	  	  	  // Prev is null
+			  // std::cout << "Case 4" << std::endl;
+			  skip_list_.pop_back();
+			  // skip_list_[i] = nullptr;
 	  	  	}
 	  	  }
 	  	}
@@ -526,5 +453,96 @@ template <typename Key_T, typename Mapped_T>
 bool operator!=(
     const typename cs540::Map<Key_T, Mapped_T>::ReverseIterator &first,
     const typename cs540::Map<Key_T, Mapped_T>::ReverseIterator &second);
+
+template <typename Key_T, typename Mapped_T>
+bool cs540::Map<Key_T, Mapped_T>::insert_node(
+    cs540::Map<Key_T, Mapped_T>::Node *element,
+    cs540::Map<Key_T, Mapped_T>::Node *current_element, size_t current_level) {
+  if (element->pair_val_.first == current_element->pair_val_.first) return false;
+  if (element->pair_val_.first < current_element->pair_val_.first) {
+	// Insert_Node element before current_element
+	if (current_element == skip_list_[current_level]) {
+	  // Insert_Nodeing at head
+	  if (current_level != 0) {
+		if (!insert_node(element, skip_list_[current_level - 1], current_level - 1)) {
+		  return false;
+		}
+	  }
+	  element->next_[current_level] = current_element;
+	  current_element->prev_[current_level] = element;
+	  assert(element->next_[current_level]->prev_[current_level] == element);
+	  skip_list_[current_level] = element;
+	} else {
+	  // Insert_Nodeing not at head
+	  if (current_level != 0) {
+		if (!insert_node(element, current_element->prev_[current_level], current_level - 1)) {
+		  return false;
+		}
+	  }
+	  element->next_[current_level] = current_element;
+	  element->prev_[current_level] = current_element->prev_[current_level];
+	  current_element->prev_[current_level]->next_[current_level] = element;
+	  current_element->prev_[current_level] = element;
+	  assert(element->next_[current_level]->prev_[current_level] == element);
+	  assert(element->prev_[current_level]->next_[current_level] == element);
+	}
+  } else {
+	// Insert_Node element after current_element
+	if (current_element->next_[current_level] == nullptr) {
+	  // Next is null
+	  if (current_level != 0) {
+		if (!insert_node(element, current_element, current_level - 1)) {
+		  return false;
+		}
+	  } else {
+		end_.node_ = element;
+	  }
+	  current_element->next_[current_level] = element;
+	  element->prev_[current_level] = current_element;
+	} else {
+	  if (!insert_node(element, current_element->next_[current_level], current_level)) {
+		return false;
+	  }
+	}
+  }
+  return true;
+}
+
+template <typename Key_T, typename Mapped_T>
+typename cs540::Map<Key_T, Mapped_T>::Node* cs540::Map<Key_T, Mapped_T>::find_node(
+    const Key_T &key, cs540::Map<Key_T, Mapped_T>::Node *current_element,
+    size_t current_level) {
+  if (key == current_element->pair_val_.first) return current_element;
+  if (key < current_element->pair_val_.first) {
+	// Searching element before current_element
+	if (current_element == skip_list_[current_level]) {
+	  // Searching at head
+	  if (current_level != 0) {
+		return find_node(key, skip_list_[current_level - 1], current_level - 1);
+	  } else {
+		return nullptr;
+	  }
+	} else {
+	  // Searching not at head
+	  if (current_level != 0) {
+		return find_node(key, current_element->prev_[current_level], current_level - 1);
+	  } else {
+		return nullptr;
+	  }
+	}
+  } else {
+	// Search element after current_element
+	if (current_element->next_[current_level] == nullptr) {
+	  // Next is null
+	  if (current_level != 0) {
+		return find_node(key, current_element, current_level - 1);
+	  } else {
+		return nullptr;
+	  }
+	} else {
+	  return find_node(key, current_element->next_[current_level], current_level);
+	}
+  }
+}
 
 #endif
