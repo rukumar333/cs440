@@ -14,11 +14,14 @@
 #ifndef CS440_MAP_HPP_
 #define CS440_MAP_HPP_
 
-namespace cs540 {
+namespace cs540 {  
+  
   template <typename Key_T, typename Mapped_T>
   class Map {
    public:
-	class ReverseIterator;	
+	class Iterator;
+	class ConstIterator;
+	class ReverseIterator;
    private:
 	/*
 	  Private Node class
@@ -86,11 +89,17 @@ namespace cs540 {
 	void print() {
 	  print_map();
 	}
-	
+
 	class Iterator {
 	  friend class Map;
 	  friend class ConstIterator;
-	 private:
+	  friend bool operator==(const Iterator first, const Iterator second);
+	  // friend bool operator==(const ConstIterator first, const Iterator second);
+	  // friend bool operator==(const Iterator first, const ConstIterator second);
+	  friend bool operator!=(const Iterator first, const Iterator second);
+	  // friend bool operator!=(const ConstIterator first, const Iterator second);
+	  // friend bool operator!=(const Iterator first, const ConstIterator second);
+	 public:
 	  Node *node_;
 	  Iterator() {
 		node_ = nullptr;
@@ -99,9 +108,6 @@ namespace cs540 {
 		node_ = other_node;
 	  }
 	 public:
-	  // Iterator(const Iterator &other); // Implicit should be ok
-	  // ~Iterator(); // Implicit should be ok
-	  // Iterator &operator=(const Iterator &other); // Implicit should be ok
 	  Iterator &operator++() {
 		node_ = node_->next_[0];
 		return *this;
@@ -128,41 +134,51 @@ namespace cs540 {
 	  }
 	};
 
-	class ConstIterator {
-	  friend class Map;	  
+	class ConstIterator : public Iterator{
+	  friend class Map;
+	  friend class Iterator;
+	  // friend bool operator==(const ConstIterator first, const ConstIterator second);
+	  // friend bool operator!=(const Iterator first, const CosIterator second);
+	  // friend bool operator==(const ConstIterator first, const Iterator second);
+	  // friend bool operator==(const Iterator first, const ConstIterator second);
+	  // friend bool operator!=(const ConstIterator first, const Iterator second);
+	  // friend bool operator!=(const Iterator first, const ConstIterator second);
 	 private:
-	  Node *node_;
-	  ConstIterator() {
-		node_ = nullptr;
-	  }
-	  ConstIterator(Node *other_node) {
-		node_ = other_node;
-	  }
+	  // Node *node_;
+	  // ConstIterator() {
+	  // 	node_ = nullptr;
+	  // }
+	  // ConstIterator(Node *other_node) {
+	  // 	node_ = other_node;
+	  // }
+	  // ValueType &operator*() const {
+	  // 	return node_->pair_val_;
+	  // }
+	  // ValueType *operator->() const {
+	  // 	return &(node_->pair_val_);
+	  // }	  
 	 public:
-	  // ConstIterator(const ConstIterator &other); // Implicit should be ok
-	  ConstIterator(const Iterator &other) {
-		this->node_ = other.node_;
-	  }
-	  // ~ConstIterator(); // Implicit should be ok
-	  // ConstIterator &operator=(const ConstIterator &other); // Implicit should be ok
-	  ConstIterator &operator++() {
-		node_ = node_->next_[0];
-		return *this;
-	  }
-	  ConstIterator operator++(int) {
-		ConstIterator it(*this);
-		node_ = node_->next_[0];
-		return it;
-	  }
-	  ConstIterator &operator--() {
-		node_ = node_->prev_[0];
-		return *this;		
-	  }
-	  ConstIterator operator--(int) {
-		ConstIterator it(*this);
-		node_ = node_->prev_[0];
-		return it;		
-	  }
+	  // ConstIterator(const Iterator &other) {
+	  // 	this->node_ = other.node_;
+	  // }
+	  // ConstIterator &operator++() {
+	  // 	node_ = node_->next_[0];
+	  // 	return *this;
+	  // }
+	  // ConstIterator operator++(int) {
+	  // 	ConstIterator it(*this);
+	  // 	node_ = node_->next_[0];
+	  // 	return it;
+	  // }
+	  // ConstIterator &operator--() {
+	  // 	node_ = node_->prev_[0];
+	  // 	return *this;		
+	  // }
+	  // ConstIterator operator--(int) {
+	  // 	ConstIterator it(*this);
+	  // 	node_ = node_->prev_[0];
+	  // 	return it;		
+	  // }
 	  const ValueType &operator*() const {
 		return node_->pair_val_;
 	  }
@@ -182,9 +198,6 @@ namespace cs540 {
 		node_ = other_node;
 	  }
 	 public:
-	  // ReverseIterator(const ReverseIterator &other); // Implicit should be ok
-	  // ~ReverseIterator(); // Implicit should be ok
-	  // ReverseIterator &operator=(const ReverseIterator &other); // Implicit should be ok
 	  ReverseIterator &operator++() {
 		node_ = node_->prev_[0];
 		return *this;
@@ -210,6 +223,34 @@ namespace cs540 {
 		return &(node_->pair_val_);
 	  }
 	};
+
+	/*
+	  Iterator comparators
+	*/
+	friend bool operator==(const Iterator first, const Iterator second) {
+	  return first.node_ == second.node_;
+	}
+	friend bool operator!=(const Iterator first, const Iterator second) {
+	  return first.node_ != second.node_;
+	}
+	// friend bool operator==(const ConstIterator first, const ConstIterator second) {
+	//   return first.node_ == second.node_;
+	// }
+	// friend bool operator!=(const ConstIterator first, const ConstIterator second) {
+	//   return first.node_ != second.node_;
+	// }
+	// friend bool operator==(const ConstIterator first, const Iterator second) {
+	//   return first.node_ == second.node_;
+	// }
+	// friend bool operator!=(const ConstIterator first, const Iterator second) {
+	//   return first.node_ != second.node_;
+	// }
+	// friend bool operator==(const Iterator first, const ConstIterator second) {
+	//   return first.node_ == second.node_;
+	// }
+	// friend bool operator!=(const Iterator first, const ConstIterator second) {
+	//   return first.node_ != second.node_;
+	// }
 	/*
 	  Ctors, assignment, dtor
 	 */
@@ -339,7 +380,8 @@ namespace cs540 {
 		}		
 	  }
 	  return std::make_pair(Iterator(element), true);
-	}	
+	}
+	
 	template <typename IT_T>
 	void insert(IT_T range_beg, IT_T range_end) {
 	  while (range_beg != range_end) {
@@ -405,54 +447,62 @@ namespace cs540 {
   };
 }
 
-template <typename Key_T, typename Mapped_T>
-bool operator==(const cs540::Map<Key_T, Mapped_T> &first,
-                const cs540::Map<Key_T, Mapped_T> &second);
-template <typename Key_T, typename Mapped_T>
-bool operator!=(const cs540::Map<Key_T, Mapped_T> &first,
-                const cs540::Map<Key_T, Mapped_T> &second);
-template <typename Key_T, typename Mapped_T>
-bool operator<(const cs540::Map<Key_T, Mapped_T> &first,
-               const cs540::Map<Key_T, Mapped_T> &second);
+// template <typename Key_T, typename Mapped_T>
+// bool operator==(const cs540::Map<Key_T, Mapped_T> &first,
+//                 const cs540::Map<Key_T, Mapped_T> &second);
+// template <typename Key_T, typename Mapped_T>
+// bool operator!=(const cs540::Map<Key_T, Mapped_T> &first,
+//                 const cs540::Map<Key_T, Mapped_T> &second);
+// template <typename Key_T, typename Mapped_T>
+// bool operator<(const cs540::Map<Key_T, Mapped_T> &first,
+//                const cs540::Map<Key_T, Mapped_T> &second);
 
-template <typename Key_T, typename Mapped_T>
-bool operator==(const typename cs540::Map<Key_T, Mapped_T>::Iterator &first,
-                const typename cs540::Map<Key_T, Mapped_T>::Iterator &second);
-template <typename Key_T, typename Mapped_T>
-bool operator==(
-    const typename cs540::Map<Key_T, Mapped_T>::ConstIterator &first,
-    const typename cs540::Map<Key_T, Mapped_T>::ConstIterator &second);
-template <typename Key_T, typename Mapped_T>
-bool operator==(
-    const typename cs540::Map<Key_T, Mapped_T>::Iterator &first,
-    const typename cs540::Map<Key_T, Mapped_T>::ConstIterator &second);
-template <typename Key_T, typename Mapped_T>
-bool operator==(
-    const typename cs540::Map<Key_T, Mapped_T>::ConstIterator &first,
-    const typename cs540::Map<Key_T, Mapped_T>::Iterator &second);
-template <typename Key_T, typename Mapped_T>
-bool operator!=(const typename cs540::Map<Key_T, Mapped_T>::Iterator &first,
-                const typename cs540::Map<Key_T, Mapped_T>::Iterator &second);
-template <typename Key_T, typename Mapped_T>
-bool operator!=(
-    const typename cs540::Map<Key_T, Mapped_T>::ConstIterator &first,
-    const typename cs540::Map<Key_T, Mapped_T>::ConstIterator &second);
-template <typename Key_T, typename Mapped_T>
-bool operator!=(
-    const typename cs540::Map<Key_T, Mapped_T>::Iterator &first,
-    const typename cs540::Map<Key_T, Mapped_T>::ConstIterator &second);
-template <typename Key_T, typename Mapped_T>
-bool operator!=(
-    const typename cs540::Map<Key_T, Mapped_T>::ConstIterator &first,
-    const typename cs540::Map<Key_T, Mapped_T>::Iterator &second);
-template <typename Key_T, typename Mapped_T>
-bool operator==(
-    const typename cs540::Map<Key_T, Mapped_T>::ReverseIterator &first,
-    const typename cs540::Map<Key_T, Mapped_T>::ReverseIterator &second);
-template <typename Key_T, typename Mapped_T>
-bool operator!=(
-    const typename cs540::Map<Key_T, Mapped_T>::ReverseIterator &first,
-    const typename cs540::Map<Key_T, Mapped_T>::ReverseIterator &second);
+// template <typename Key_T, typename Mapped_T>
+// bool operator==(const typename cs540::Map<Key_T, Mapped_T>::Iterator first,
+//                 const typename cs540::Map<Key_T, Mapped_T>::Iterator second) {
+//   return first->node_ == second->node_;
+//   // return true;
+// }
+
+// template <typename Key_T, typename Mapped_T>
+// bool operator==(
+//     const typename cs540::Map<Key_T, Mapped_T>::ConstIterator &first,
+//     const typename cs540::Map<Key_T, Mapped_T>::ConstIterator &second);
+// template <typename Key_T, typename Mapped_T>
+// bool operator==(
+//     const typename cs540::Map<Key_T, Mapped_T>::Iterator &first,
+//     const typename cs540::Map<Key_T, Mapped_T>::ConstIterator &second);
+// template <typename Key_T, typename Mapped_T>
+// bool operator==(
+//     const typename cs540::Map<Key_T, Mapped_T>::ConstIterator &first,
+//     const typename cs540::Map<Key_T, Mapped_T>::Iterator &second);
+
+// template <typename Key_T, typename Mapped_T>
+// bool operator!=(const typename cs540::Map<Key_T, Mapped_T>::Iterator &first,
+//                 const typename cs540::Map<Key_T, Mapped_T>::Iterator &second) {
+//   return !(first == second);
+// }
+
+// template <typename Key_T, typename Mapped_T>
+// bool operator!=(
+//     const typename cs540::Map<Key_T, Mapped_T>::ConstIterator &first,
+//     const typename cs540::Map<Key_T, Mapped_T>::ConstIterator &second);
+// template <typename Key_T, typename Mapped_T>
+// bool operator!=(
+//     const typename cs540::Map<Key_T, Mapped_T>::Iterator &first,
+//     const typename cs540::Map<Key_T, Mapped_T>::ConstIterator &second);
+// template <typename Key_T, typename Mapped_T>
+// bool operator!=(
+//     const typename cs540::Map<Key_T, Mapped_T>::ConstIterator &first,
+//     const typename cs540::Map<Key_T, Mapped_T>::Iterator &second);
+// template <typename Key_T, typename Mapped_T>
+// bool operator==(
+//     const typename cs540::Map<Key_T, Mapped_T>::ReverseIterator &first,
+//     const typename cs540::Map<Key_T, Mapped_T>::ReverseIterator &second);
+// template <typename Key_T, typename Mapped_T>
+// bool operator!=(
+//     const typename cs540::Map<Key_T, Mapped_T>::ReverseIterator &first,
+//     const typename cs540::Map<Key_T, Mapped_T>::ReverseIterator &second);
 
 template <typename Key_T, typename Mapped_T>
 bool cs540::Map<Key_T, Mapped_T>::insert_node(
