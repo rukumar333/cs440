@@ -305,7 +305,6 @@ namespace cs540 {
 	  Modifier
 	 */
 	std::pair<Iterator, bool> insert(const ValueType &value) {
-	  ++ size_;
 	  double rand_dbl = dist_(gen_);
 	  size_t num_levels = get_number_levels(rand_dbl);
 	  // std::cout << "Rand_dbl: " << rand_dbl << std::endl;
@@ -327,6 +326,7 @@ namespace cs540 {
 		  skip_list_.push_back(element);
 		}		
 	  }
+	  ++ size_;
 	  return std::make_pair(Iterator(element), true);
 	}
 	
