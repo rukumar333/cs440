@@ -15,17 +15,37 @@ std::mt19937_64 gen_(rand_dev_());
 std::uniform_int_distribution<int> dist_(LOWER_LIMIT, UPPER_LIMIT);
 
 template <typename Key_T, typename Mapped_T>
-void assert_maps(const cs540::Map<Key_T, Mapped_T> &my_map, const std::map<Key_T, Mapped_T> &their_map) {
+void assert_maps(cs540::Map<Key_T, Mapped_T> &my_map, std::map<Key_T, Mapped_T> &their_map) {
+  /*
+	Size should be the same
+   */
   assert(my_map.size() == their_map.size());
+  /*
+	Iterate through w/ forward pointers
+  */
   auto my_it = my_map.begin();
   auto their_it = their_map.begin();
   while (my_it != my_map.end() && their_it != their_map.end()) {
 	assert(my_it->first == their_it->first);
 	assert(my_it->second == their_it->second);
+	assert((*my_it).first == (*their_it).first);
+	assert((*my_it).second == (*their_it).second);
 	++ my_it;
 	++ their_it;
   }
   assert(my_it == my_map.end() && their_it == their_map.end());
+  /*
+	Iterate through w/ reverse pointers
+  */  
+  auto r_my_it = my_map.rbegin();
+  auto r_their_it= their_map.rbegin();
+  while (r_my_it != my_map.rend() && r_their_it != their_map.rend()) {
+  	assert(r_my_it->first == r_their_it->first);
+  	assert(r_my_it->second == r_their_it->second);
+  	++ r_my_it;
+  	++ r_their_it;
+  }
+  assert(r_my_it == my_map.rend() && r_their_it == their_map.rend());
 }
 
 void test_1() {
@@ -47,6 +67,8 @@ void test_2() {
   }
   assert_maps(my_map, their_map);
 }
+
+
 
 int main() {
   test_2();

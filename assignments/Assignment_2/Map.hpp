@@ -205,6 +205,7 @@ namespace cs540 {
 	Map() : skip_list_() , gen_(rand_dev_()), dist_(0.0, 1.0), end_() { size_ = 0; }
 	Map(const Map &other) {
 	  size_ = other.size_;
+	  
 	}
 	Map &operator=(const Map &other) {
 	  skip_list_.clear();
