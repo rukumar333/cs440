@@ -14,6 +14,18 @@ std::random_device rand_dev_;
 std::mt19937_64 gen_(rand_dev_());
 std::uniform_int_distribution<int> dist_(LOWER_LIMIT, UPPER_LIMIT);
 
+class MyClass {
+ private:
+  int data;
+  MyClass();
+  MyClass &operator=(const MyClass &other);
+ public:
+  MyClass(int a) { data = a; }
+  friend bool operator<(const MyClass &a, const MyClass &b) { return a.data < b.data; }
+  friend bool operator==(const MyClass &a, const MyClass &b) { return a.data == b.data; }
+};
+
+
 template <typename Key_T, typename Mapped_T>
 void assert_maps(cs540::Map<Key_T, Mapped_T> &my_map, std::map<Key_T, Mapped_T> &their_map) {
   /*
@@ -68,9 +80,19 @@ void test_2() {
   assert_maps(my_map, their_map);
 }
 
-
+void test_class() {
+  cs540::Map<MyClass, int> my_map;
+  std::map<MyClass, int> their_map;
+  for (int i = 0; i < TEST_2_COUNT; ++ i) {
+	std::pair<MyClass, int> to_insert(MyClass(dist_(gen_)), dist_(gen_));
+	// std::cout << to_insert.first << " " << to_insert.second << std::endl;
+	my_map.insert(to_insert);
+	their_map.insert(to_insert);	
+  }
+  assert_maps(my_map, their_map);
+}
 
 int main() {
-  test_2();
+  test_class();
 }
 
