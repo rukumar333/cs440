@@ -30,7 +30,7 @@ namespace cs540 {
 			: next_(num_levels + 1, nullptr), prev_(num_levels + 1, nullptr) { }
 	  SNode() { }
 	  ~SNode() {
-		if (next_.size() != 0) {
+		if (next_.size() != 0 && next_[0] != nullptr) {
 		  delete next_[0];
 		}
 	  }
@@ -248,24 +248,26 @@ namespace cs540 {
 	  Iterator
 	 */
 	Iterator begin() {
-	  if(skip_list_.size() > 0) return Iterator(skip_list_[0]);
-	  else return Iterator();
+	  return Iterator(begin_sent_->next_[0]);
+	  // if(begin_sent_->.size() > 0) return Iterator(skip_list_[0]);
+	  // else return Iterator();
 	}
 	Iterator end() {
-	  return Iterator();
+	  return Iterator(end_sent_);
 	}
 	ConstIterator begin() const {
-	  if(skip_list_.size() > 0) return ConstIterator(skip_list_[0]);
-	  else return ConstIterator();	  
+	  return ConstIterator(begin_sent_->next_[0]);
+	  // if(skip_list_.size() > 0) return ConstIterator(skip_list_[0]);
+	  // else return ConstIterator();	  
 	}
 	ConstIterator end() const {
-	  return ConstIterator();
+	  return ConstIterator(end_sent_);
 	}
 	ReverseIterator rbegin() {
 	  return ReverseIterator(end_sent_->prev_[0]);
 	}
 	ReverseIterator rend() {
-	  return ReverseIterator();
+	  return ReverseIterator(begin_sent_);
 	}
 	/*
 	  Element Access
@@ -332,20 +334,25 @@ namespace cs540 {
 	  double rand_dbl = dist_(gen_);
 	  size_t num_levels = get_number_levels(rand_dbl);
 	  Node *element = new Node(value.first, value.second, num_levels);
-	  if (skip_list_.size() == 0) {
+	  // if (skip_list_.size() == 0) {
 		// Initial inserts
-		while (skip_list_.size() < num_levels + 1) {
-		  skip_list_.push_back(element);
-		}
-	  } else {
-		size_t min_index = std::min((size_t)skip_list_.size() - 1, num_levels);
-		if (!insert_node(element, skip_list_[min_index], min_index)) {
-		  // return std::make_pair(Iterator((Node *)nullptr), false);
-		}
-		while (skip_list_.size() < num_levels + 1) {
-		  skip_list_.push_back(element);
-		}		
+	  while (begin_sent_->next_.size() < num_levels + 1) {
+		begin_sent_->next_.push_back(end_sent_);
+		end_sent_->prev_.push_back(begin_sent_);
+		begin_sent_->prev_.push_back(nullptr);
+		end_sent_->next_.push_back(nullptr);
+		// skip_list_.push_back(element);
 	  }
+	  // } else {
+	  size_t min_index = std::min((size_t)begin_sent_->next_.size() - 1, num_levels);
+	  if (!insert_node(element, begin_sent_->next_[min_index], min_index)) {
+		delete element;
+		return std::make_pair(Iterator((Node *)nullptr), false);
+	  }
+	  // while (skip_list_.size() < num_levels + 1) {
+	  // 	skip_list_.push_back(element);
+	  // }
+	  // }
 	  ++ size_;
 	  return std::make_pair(Iterator(element), true);
 	}
@@ -479,7 +486,27 @@ bool cs540::Map<Key_T, Mapped_T>::insert_node(
   bool need_to_insert = false;
   if (current_element == end_sent_) {
 	need_to_insert = true;
+	//
+	if (current_level != 0) {
+	  if (!insert_node(element, current_element->prev_[current_level]->next_[current_level - 1], current_level - 1)) {
+		return false;
+	  }
+	}
+	element->next_[current_level] = current_element;
+	element->prev_[current_level] = current_element->prev_[current_level];
+	current_element->prev_[current_level]->next_[current_level] = element;
+	current_element->prev_[current_level] = element;
+	assert(element->next_[current_level]->prev_[current_level] == element);
+	assert(element->prev_[current_level]->next_[current_level] == element);
+	return true;
+	//
   }
+  assert(element != nullptr);
+  assert(element != end_sent_);
+  assert(element != begin_sent_);
+  assert(current_element != nullptr);
+  assert(current_element != end_sent_);
+  assert(current_element != begin_sent_);
   if (element->pair_val_.first == static_cast<Node *>(current_element)->pair_val_.first) return false;
   if (element->pair_val_.first < static_cast<Node *>(current_element)->pair_val_.first) {
 	// Insert_Node element before current_element
@@ -498,7 +525,7 @@ bool cs540::Map<Key_T, Mapped_T>::insert_node(
 	// } else {
 	  // Insert_Nodeing not at head
 	if (current_level != 0) {
-	  if (!insert_node(element, current_element->prev_[current_level], current_level - 1)) {
+	  if (!insert_node(element, current_element->prev_[current_level]->next_[current_level - 1], current_level - 1)) {
 		return false;
 	  }
 	}

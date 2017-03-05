@@ -8,7 +8,7 @@
 #define UPPER_LIMIT 10000
 #define LOWER_LIMIT -10000
 
-#define TEST_2_COUNT 10000
+#define TEST_2_COUNT 100000
 
 std::random_device rand_dev_;
 std::mt19937_64 gen_(rand_dev_());
@@ -75,9 +75,9 @@ void test_2() {
 	std::pair<int, int> to_insert(dist_(gen_), dist_(gen_));
 	// std::cout << to_insert.first << " " << to_insert.second << std::endl;
 	my_map.insert(to_insert);
-	their_map.insert(to_insert);	
+	// their_map.insert(to_insert);
   }
-  assert_maps(my_map, their_map);
+  // assert_maps(my_map, their_map);
 }
 
 void test_class() {
@@ -93,6 +93,7 @@ void test_class() {
 }
 
 int main() {
-  test_class();
+  // test_class();
+  test_2();
 }
 
