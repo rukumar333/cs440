@@ -72,10 +72,10 @@ namespace cs540 {
 
 	bool insert_node(Node *element, SNode *current_element, size_t current_level);
 	
-	Node *find_node(const Key_T &key) {
-	  return find_node(key, skip_list_.back(), skip_list_.size() - 1);
+	SNode *find_node(const Key_T &key) {
+	  return find_node(key, begin_sent_->next_.back(), begin_sent_->next_.size() - 1);
 	}
-	Node *find_node(const Key_T &key, Node *current_element, size_t current_level);
+	SNode *find_node(const Key_T &key, SNode *current_element, size_t current_level);
 	
 	void print_map() {
 	  for (int i = skip_list_.size() - 1; i >=0 ; -- i) {
@@ -413,7 +413,6 @@ namespace cs540 {
 		delete skip_list_[0];
 		skip_list_.clear();
 		size_ = 0;
-		
 	  }
 	}
 	/*
