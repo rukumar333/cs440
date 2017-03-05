@@ -70,7 +70,7 @@ namespace cs540 {
 	  return levels;
 	}
 
-	bool insert_node(SNode *element, SNode *current_element, size_t current_level);
+	bool insert_node(Node *element, SNode *current_element, size_t current_level);
 	
 	Node *find_node(const Key_T &key) {
 	  return find_node(key, skip_list_.back(), skip_list_.size() - 1);
@@ -98,7 +98,7 @@ namespace cs540 {
 	std::random_device rand_dev_;
 	std::mt19937_64 gen_;
 	std::uniform_real_distribution<double> dist_;
-	ReverseIterator end_;
+	// ReverseIterator end_;
 	SNode *begin_sent_;
 	SNode *end_sent_;
    public:
@@ -114,15 +114,15 @@ namespace cs540 {
 	  Iterator() {
 	  	this->node_ = nullptr;
 	  }
-	  Iterator(Node *other_node) {
+	  Iterator(SNode *other_node) {
 	  	this->node_ = other_node;
 	  }
 	 public:
 	  ValueType &operator*() const {
-		return this->node_->pair_val_;
+		return static_cast<Node *>(this->node_)->pair_val_;
 	  }
 	  ValueType *operator->() const {
-		return &(this->node_->pair_val_);
+		return &(static_cast<Node *>(this->node_)->pair_val_);
 	  }
 	};
 
@@ -130,11 +130,11 @@ namespace cs540 {
 	  friend class Map;
 	  friend class Iterator;
 	 protected:
-	  Node *node_;
+	  SNode *node_;
 	  ConstIterator() {
 	  	node_ = nullptr;
 	  }
-	  ConstIterator(Node *other_node) {
+	  ConstIterator(SNode *other_node) {
 	  	node_ = other_node;
 	  }
 	 public:
@@ -160,10 +160,10 @@ namespace cs540 {
 	  	return it;		
 	  }
 	  const ValueType &operator*() const {
-		return node_->pair_val_;
+		return static_cast<Node *>(node_)->pair_val_;
 	  }
 	  const ValueType *operator->() const {
-		return &(node_->pair_val_);
+		return &(static_cast<Node *>(node_)->pair_val_);
 	  }
 	  friend bool operator==(const ConstIterator first, const ConstIterator second) {
 		return first.node_ == second.node_;
@@ -176,11 +176,11 @@ namespace cs540 {
 	class ReverseIterator {
 	  friend class Map;
 	 private:
-	  Node *node_;
+	  SNode *node_;
 	  ReverseIterator() {
 		node_ = nullptr;
 	  }
-	  ReverseIterator(Node *other_node) {
+	  ReverseIterator(SNode *other_node) {
 		node_ = other_node;
 	  }
 	 public:
@@ -203,10 +203,10 @@ namespace cs540 {
 		return it;		
 	  }
 	  ValueType &operator*() const {
-		return node_->pair_val_;		
+		return static_cast<Node *>(node_)->pair_val_;		
 	  }
 	  ValueType *operator->() const {
-		return &(node_->pair_val_);
+		return &(static_cast<Node *>(node_)->pair_val_);
 	  }
 	  friend bool operator==(const ReverseIterator first, const ReverseIterator second) {
 		return first.node_ == second.node_;
@@ -218,7 +218,7 @@ namespace cs540 {
 	/*
 	  Ctors, assignment, dtor
 	*/
-	Map() : skip_list_() , gen_(rand_dev_()), dist_(0.0, 1.0), end_() {
+	Map() : skip_list_() , gen_(rand_dev_()), dist_(0.0, 1.0) {
 	  size_ = 0;
 	  begin_sent_ = new SNode();
 	  end_sent_ = new SNode();
@@ -262,7 +262,7 @@ namespace cs540 {
 	  return ConstIterator();
 	}
 	ReverseIterator rbegin() {
-	  return end_;
+	  return ReverseIterator(end_sent_->prev_[0]);
 	}
 	ReverseIterator rend() {
 	  return ReverseIterator();
@@ -337,7 +337,6 @@ namespace cs540 {
 		while (skip_list_.size() < num_levels + 1) {
 		  skip_list_.push_back(element);
 		}
-		end_.node_ = element;
 	  } else {
 		size_t min_index = std::min((size_t)skip_list_.size() - 1, num_levels);
 		if (!insert_node(element, skip_list_[min_index], min_index)) {
@@ -407,7 +406,7 @@ namespace cs540 {
 		delete skip_list_[0];
 		skip_list_.clear();
 		size_ = 0;
-		end_.node_ = nullptr;
+		
 	  }
 	}
 	/*
@@ -475,54 +474,61 @@ namespace cs540 {
 
 template <typename Key_T, typename Mapped_T>
 bool cs540::Map<Key_T, Mapped_T>::insert_node(
-    cs540::Map<Key_T, Mapped_T>::SNode *element,
+    cs540::Map<Key_T, Mapped_T>::Node *element,
     cs540::Map<Key_T, Mapped_T>::SNode *current_element, size_t current_level) {
-  if (element->pair_val_.first == current_element->pair_val_.first) return false;
-  if (element->pair_val_.first < current_element->pair_val_.first) {
+  bool need_to_insert = false;
+  if (current_element == end_sent_) {
+	need_to_insert = true;
+  }
+  if (element->pair_val_.first == static_cast<Node *>(current_element)->pair_val_.first) return false;
+  if (element->pair_val_.first < static_cast<Node *>(current_element)->pair_val_.first) {
 	// Insert_Node element before current_element
-	if (current_element == skip_list_[current_level]) {
-	  // Insert_Nodeing at head
-	  if (current_level != 0) {
-		if (!insert_node(element, skip_list_[current_level - 1], current_level - 1)) {
-		  return false;
-		}
-	  }
-	  element->next_[current_level] = current_element;
-	  current_element->prev_[current_level] = element;
-	  assert(element->next_[current_level]->prev_[current_level] == element);
-	  skip_list_[current_level] = element;
-	} else {
+	need_to_insert = true;
+	// if (current_element == skip_list_[current_level]) {
+	//   // Insert_Nodeing at head
+	//   if (current_level != 0) {
+	// 	if (!insert_node(element, skip_list_[current_level - 1], current_level - 1)) {
+	// 	  return false;
+	// 	}
+	//   }
+	//   element->next_[current_level] = current_element;
+	//   current_element->prev_[current_level] = element;
+	//   assert(element->next_[current_level]->prev_[current_level] == element);
+	//   skip_list_[current_level] = element;
+	// } else {
 	  // Insert_Nodeing not at head
-	  if (current_level != 0) {
-		if (!insert_node(element, current_element->prev_[current_level], current_level - 1)) {
-		  return false;
-		}
-	  }
-	  element->next_[current_level] = current_element;
-	  element->prev_[current_level] = current_element->prev_[current_level];
-	  current_element->prev_[current_level]->next_[current_level] = element;
-	  current_element->prev_[current_level] = element;
-	  assert(element->next_[current_level]->prev_[current_level] == element);
-	  assert(element->prev_[current_level]->next_[current_level] == element);
-	}
-  } else {
-	// Insert_Node element after current_element
-	if (current_element->next_[current_level] == nullptr) {
-	  // Next is null
-	  if (current_level != 0) {
-		if (!insert_node(element, current_element, current_level - 1)) {
-		  return false;
-		}
-	  } else {
-		end_.node_ = element;
-	  }
-	  current_element->next_[current_level] = element;
-	  element->prev_[current_level] = current_element;
-	} else {
-	  if (!insert_node(element, current_element->next_[current_level], current_level)) {
+	if (current_level != 0) {
+	  if (!insert_node(element, current_element->prev_[current_level], current_level - 1)) {
 		return false;
 	  }
 	}
+	// }
+  } else {
+	// Insert_Node element after current_element
+	// if (current_element->next_[current_level] == nullptr) {
+	//   // Next is null
+	//   if (current_level != 0) {
+	// 	if (!insert_node(element, current_element, current_level - 1)) {
+	// 	  return false;
+	// 	}
+	//   } else {
+	// 	end_.node_ = element;
+	//   }
+	//   current_element->next_[current_level] = element;
+	//   element->prev_[current_level] = current_element;
+	// } else {
+	if (!insert_node(element, current_element->next_[current_level], current_level)) {
+	  return false;
+	}
+	// }
+  }
+  if (need_to_insert) {
+	element->next_[current_level] = current_element;
+	element->prev_[current_level] = current_element->prev_[current_level];
+	current_element->prev_[current_level]->next_[current_level] = element;
+	current_element->prev_[current_level] = element;
+	assert(element->next_[current_level]->prev_[current_level] == element);
+	assert(element->prev_[current_level]->next_[current_level] == element);
   }
   return true;
 }
