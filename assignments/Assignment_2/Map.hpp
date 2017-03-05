@@ -22,24 +22,40 @@ namespace cs540 {
 	class ConstIterator;
 	class ReverseIterator;
    private:
-	/*
-	  Private Node class
-	 */
-	class Node {
+	class SNode {
 	 public:
-	  // const Key_T key_;
-	  // Mapped_T value_;
-	  std::pair<const Key_T, Mapped_T> pair_val_;
-	  std::vector<Node *> next_;
-	  std::vector<Node *> prev_;
-	  Node(Key_T key, Mapped_T value, size_t num_levels)
-		: pair_val_(key, value), next_(num_levels + 1, nullptr),
-		  prev_(num_levels + 1, nullptr){}
-	  ~Node() {
+	  std::vector<SNode *> next_;
+	  std::vector<SNode *> prev_;
+	  SNode(size_t num_levels)
+			: next_(num_levels + 1, nullptr), prev_(num_levels + 1, nullptr) { }
+	  SNode() { }
+	  ~SNode() {
 		if (next_.size() != 0) {
 		  delete next_[0];
 		}
 	  }
+	};
+	
+	/*
+	  Private Node class
+	 */
+	class Node : public SNode {
+	 public:
+	  // const Key_T key_;
+	  // Mapped_T value_;
+	  std::pair<const Key_T, Mapped_T> pair_val_;
+	  // std::vector<Node *> next_;
+	  // std::vector<Node *> prev_;
+	  // Node(Key_T key, Mapped_T value, size_t num_levels)
+	  // 	: pair_val_(key, value), next_(num_levels + 1, nullptr),
+	  // 	  prev_(num_levels + 1, nullptr){}
+	  Node(Key_T key, Mapped_T value, size_t num_levels)
+	  	: SNode(num_levels), pair_val_(key, value){}
+	  // ~Node() {
+	  // 	if (this->next_.size() != 0) {
+	  // 	  delete this->next_[0];
+	  // 	}
+	  // }
 	};
 
 	/*
@@ -54,7 +70,7 @@ namespace cs540 {
 	  return levels;
 	}
 
-	bool insert_node(Node *element, Node *current_element, size_t current_level);
+	bool insert_node(SNode *element, SNode *current_element, size_t current_level);
 	
 	Node *find_node(const Key_T &key) {
 	  return find_node(key, skip_list_.back(), skip_list_.size() - 1);
@@ -73,6 +89,7 @@ namespace cs540 {
 	  }
 	}
 
+	void copy_map(const Map &other);
 	/*
 	  Private Data Members
 	 */
@@ -82,7 +99,8 @@ namespace cs540 {
 	std::mt19937_64 gen_;
 	std::uniform_real_distribution<double> dist_;
 	ReverseIterator end_;
-	
+	SNode *begin_sent_;
+	SNode *end_sent_;
    public:
 	typedef std::pair<const Key_T, Mapped_T> ValueType;
 	void print() {
@@ -197,11 +215,14 @@ namespace cs540 {
 		return first.node_ != second.node_;
 	  }
 	};
-	
 	/*
 	  Ctors, assignment, dtor
-	 */
-	Map() : skip_list_() , gen_(rand_dev_()), dist_(0.0, 1.0), end_() { size_ = 0; }
+	*/
+	Map() : skip_list_() , gen_(rand_dev_()), dist_(0.0, 1.0), end_() {
+	  size_ = 0;
+	  begin_sent_ = new SNode();
+	  end_sent_ = new SNode();
+	}
 	Map(const Map &other) {
 	  size_ = other.size_;
 	  
@@ -210,10 +231,13 @@ namespace cs540 {
 	  skip_list_.clear();
 	  size_ = other.size_;
 	}
-	Map(std::initializer_list<std::pair<const Key_T, Mapped_T>>);
+	Map(std::initializer_list<std::pair<const Key_T, Mapped_T>>) {
+	  
+	}
 	~Map() {
-	  if(skip_list_.size() > 0)
-		delete skip_list_[0];
+	  delete begin_sent_;
+	  // if(skip_list_.size() > 0)
+	  // 	delete skip_list_[0];
 	}
 	/*
 	  Size
@@ -307,8 +331,6 @@ namespace cs540 {
 	std::pair<Iterator, bool> insert(const ValueType &value) {
 	  double rand_dbl = dist_(gen_);
 	  size_t num_levels = get_number_levels(rand_dbl);
-	  // std::cout << "Rand_dbl: " << rand_dbl << std::endl;
-	  // std::cout << "num_levels: " << num_levels << std::endl;
 	  Node *element = new Node(value.first, value.second, num_levels);
 	  if (skip_list_.size() == 0) {
 		// Initial inserts
@@ -318,9 +340,8 @@ namespace cs540 {
 		end_.node_ = element;
 	  } else {
 		size_t min_index = std::min((size_t)skip_list_.size() - 1, num_levels);
-		// std::cout << "Min_index: " << min_index << std::endl;
 		if (!insert_node(element, skip_list_[min_index], min_index)) {
-		  return std::make_pair(Iterator((Node *)nullptr), false);
+		  // return std::make_pair(Iterator((Node *)nullptr), false);
 		}
 		while (skip_list_.size() < num_levels + 1) {
 		  skip_list_.push_back(element);
@@ -454,8 +475,8 @@ namespace cs540 {
 
 template <typename Key_T, typename Mapped_T>
 bool cs540::Map<Key_T, Mapped_T>::insert_node(
-    cs540::Map<Key_T, Mapped_T>::Node *element,
-    cs540::Map<Key_T, Mapped_T>::Node *current_element, size_t current_level) {
+    cs540::Map<Key_T, Mapped_T>::SNode *element,
+    cs540::Map<Key_T, Mapped_T>::SNode *current_element, size_t current_level) {
   if (element->pair_val_.first == current_element->pair_val_.first) return false;
   if (element->pair_val_.first < current_element->pair_val_.first) {
 	// Insert_Node element before current_element
@@ -542,5 +563,31 @@ typename cs540::Map<Key_T, Mapped_T>::Node* cs540::Map<Key_T, Mapped_T>::find_no
 	}
   }
 }
+
+// template <typename Key_T, typename Mapped_T>
+// void cs540::Map<Key_T, Mapped_T>::copy_map(const Map &other) {
+//   size_ = other.size_;
+//   Node *current = other.skip_list_[0];
+//   while (current != nullptr) {
+// 	int num_levels = current->prev_.size();
+// 	Node *element = new Node(current->value.first, current->value.second, current->prev_.size());
+// 	if (skip_list_.size() == 0) {
+// 	  // Initial inserts
+// 	  while (skip_list_.size() < num_levels + 1) {
+// 		skip_list_.push_back(element);
+// 	  }
+// 	  end_.node_ = element;
+// 	} else {
+// 	  size_t min_index = std::min((size_t)skip_list_.size() - 1, num_levels);
+// 	  insert_node(element, skip_list_[min_index], min_index);
+// 	  while (skip_list_.size() < num_levels + 1) {
+// 		skip_list_.push_back(element);
+// 	  }		
+// 	}
+// 	++ size_;
+// 	return std::make_pair(Iterator(element), true);
+	
+//   }
+// }
 
 #endif
