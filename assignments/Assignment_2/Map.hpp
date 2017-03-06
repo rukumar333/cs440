@@ -323,7 +323,7 @@ namespace cs540 {
 	  if (ptr == end_sent_) {
 		ValueType to_insert(key, Mapped_T());
 		std::pair<Iterator, bool> result = insert(to_insert);
-		return result.first.node_->pair_val_.second;		
+		return static_cast<Node *>(result.first.node_)->pair_val_.second;
 	  } else {
 		return static_cast<Node *>(ptr)->pair_val_.second;
 	  }

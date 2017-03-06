@@ -150,6 +150,7 @@ void test_4() {
 	  assert(my_map.at(key) == their_map.at(key) + 1);
 	  ++ their_int;
 	  assert(my_map.at(key) == their_map.at(key));
+	  assert(my_map[key] == their_map[key]);
   	} else {
 	  try {
 		int x = my_map.at(key);
@@ -159,7 +160,10 @@ void test_4() {
 		++ x;
 		assert(false);
 	  } catch (const std::out_of_range &e) {
-		
+		my_map[key] = 63;
+		assert(my_map[key] == 63);
+		assert(my_map.size() == their_map.size() + 1);
+		their_map[key] = 63;
 	  } catch (...) {
 		/*
 		  Should be throwing out_of_range exception
@@ -175,10 +179,11 @@ void test_4() {
   	}
   }
   assert_maps(my_map, their_map);
-  std::cout << "Completed test 4" << std::endl;
-  if (int i = 0; i < TEST_2_COUNT; ++ i) {
-  	// unsigned int 
-  }
+  // std::cout << "Completed test 4" << std::endl;
+  // if (int i = 0; i < TEST_2_COUNT / 2; ++ i) {
+  // 	unsigned int index = dist_(gen_); 
+	
+  // }
 }
 
 void test_class() {
