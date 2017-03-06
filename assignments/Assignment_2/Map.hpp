@@ -70,7 +70,7 @@ namespace cs540 {
 	  return levels;
 	}
 
-	bool insert_node(Node *element, SNode *current_element, size_t current_level);
+	bool insert_node(Node *element, size_t current_level);
 	
 	SNode *find_node(const Key_T &key) {
 	  return find_node(key, begin_sent_->next_.back(), begin_sent_->next_.size() - 1);
@@ -334,25 +334,18 @@ namespace cs540 {
 	  double rand_dbl = dist_(gen_);
 	  size_t num_levels = get_number_levels(rand_dbl);
 	  Node *element = new Node(value.first, value.second, num_levels);
-	  // if (skip_list_.size() == 0) {
-		// Initial inserts
+	  // If current size of begin_sent_ and end_Sent_ is smaller than num_levels
 	  while (begin_sent_->next_.size() < num_levels + 1) {
 		begin_sent_->next_.push_back(end_sent_);
 		end_sent_->prev_.push_back(begin_sent_);
 		begin_sent_->prev_.push_back(nullptr);
 		end_sent_->next_.push_back(nullptr);
-		// skip_list_.push_back(element);
 	  }
-	  // } else {
 	  size_t min_index = std::min((size_t)begin_sent_->next_.size() - 1, num_levels);
-	  if (!insert_node(element, begin_sent_->next_[min_index], min_index)) {
+	  if (!insert_node(element, min_index)) {
 		delete element;
 		return std::make_pair(Iterator((Node *)nullptr), false);
 	  }
-	  // while (skip_list_.size() < num_levels + 1) {
-	  // 	skip_list_.push_back(element);
-	  // }
-	  // }
 	  ++ size_;
 	  return std::make_pair(Iterator(element), true);
 	}
@@ -481,7 +474,9 @@ namespace cs540 {
 template <typename Key_T, typename Mapped_T>
 bool cs540::Map<Key_T, Mapped_T>::insert_node(
     cs540::Map<Key_T, Mapped_T>::Node *element,
-    cs540::Map<Key_T, Mapped_T>::SNode *current_element, size_t current_level) {
+	size_t current_level) {
+  SNode *current_node = begin_sent_->next_[0];
+  while ()
   bool need_to_insert = false;
   if (current_element == end_sent_) {
 	need_to_insert = true;
@@ -510,43 +505,16 @@ bool cs540::Map<Key_T, Mapped_T>::insert_node(
   if (element->pair_val_.first < static_cast<Node *>(current_element)->pair_val_.first) {
 	// Insert_Node element before current_element
 	need_to_insert = true;
-	// if (current_element == skip_list_[current_level]) {
-	//   // Insert_Nodeing at head
-	//   if (current_level != 0) {
-	// 	if (!insert_node(element, skip_list_[current_level - 1], current_level - 1)) {
-	// 	  return false;
-	// 	}
-	//   }
-	//   element->next_[current_level] = current_element;
-	//   current_element->prev_[current_level] = element;
-	//   assert(element->next_[current_level]->prev_[current_level] == element);
-	//   skip_list_[current_level] = element;
-	// } else {
-	  // Insert_Nodeing not at head
 	if (current_level != 0) {
 	  if (!insert_node(element, current_element->prev_[current_level]->next_[current_level - 1], current_level - 1)) {
 		return false;
 	  }
 	}
-	// }
   } else {
 	// Insert_Node element after current_element
-	// if (current_element->next_[current_level] == nullptr) {
-	//   // Next is null
-	//   if (current_level != 0) {
-	// 	if (!insert_node(element, current_element, current_level - 1)) {
-	// 	  return false;
-	// 	}
-	//   } else {
-	// 	end_.node_ = element;
-	//   }
-	//   current_element->next_[current_level] = element;
-	//   element->prev_[current_level] = current_element;
-	// } else {
 	if (!insert_node(element, current_element->next_[current_level], current_level)) {
 	  return false;
 	}
-	// }
   }
   if (need_to_insert) {
 	element->next_[current_level] = current_element;
