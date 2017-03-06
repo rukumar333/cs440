@@ -73,7 +73,7 @@ namespace cs540 {
 	bool insert_node(Node *element, size_t current_level);
 	
 	SNode *find_node(const Key_T &key) {
-	  SNode *current_element = begin_sent_.next_.back();
+	  SNode *current_element = begin_sent_->next_.back();
 	  int current_level = begin_sent_->next_.size() - 1;
 	  // return find_node(key, begin_sent_->next_.back(), begin_sent_->next_.size() - 1);
 	  while (current_element != nullptr) {
@@ -85,11 +85,15 @@ namespace cs540 {
 			-- current_level;
 		  }
 		} else {
-		  Key_T current_key = static_cast<Node *>(current_element)->pair_val.first;
+		  Key_T current_key = static_cast<Node *>(current_element)->pair_val_.first;
 		  if (key == current_key) return current_element;
 		  if (key < current_key) {
-			current_element = current_element->prev_[current_level]->next_[current_level - 1];
-			-- current_level;		
+			if (current_level == 0) {
+			  return end_sent_;
+			} else {
+			  current_element = current_element->prev_[current_level]->next_[current_level - 1];
+			  -- current_level;
+			}
 		  } else {
 			current_element = current_element->next_[current_level];		
 		  } 
