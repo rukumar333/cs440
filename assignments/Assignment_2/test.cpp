@@ -25,11 +25,13 @@ class MyClass {
   friend bool operator==(const MyClass &a, const MyClass &b) { return a.data == b.data; }
 };
 
-template <typename Key_T, typename Mapped_T>
-void assert_maps_const(const cs540::Map<Key_T, Mapped_T> &my_map, const std::map<Key_T, Mapped_T> &their_map);
+// template <typename Key_T, typename Mapped_T>
+template <typename Map_One_T, typename Map_Two_T>
+void assert_maps_const(const Map_One_T &my_map, const Map_Two_T &their_map);
 
-template <typename Key_T, typename Mapped_T>
-void assert_maps(cs540::Map<Key_T, Mapped_T> &my_map, std::map<Key_T, Mapped_T> &their_map) {
+// template <typename Key_T, typename Mapped_T>
+template <typename Map_One_T, typename Map_Two_T>
+void assert_maps(Map_One_T &my_map, Map_Two_T &their_map) {
   /*
 	Size should be the same
    */
@@ -66,8 +68,8 @@ void assert_maps(cs540::Map<Key_T, Mapped_T> &my_map, std::map<Key_T, Mapped_T> 
   assert_maps_const(my_map, their_map);
 }
 
-template <typename Key_T, typename Mapped_T>
-void assert_maps_const(const cs540::Map<Key_T, Mapped_T> &my_map, const std::map<Key_T, Mapped_T> &their_map) {
+template <typename Map_One_T, typename Map_Two_T>
+void assert_maps_const(const Map_One_T &my_map, const Map_Two_T &their_map) {
   /*
 	Size should be the same
    */
@@ -92,10 +94,11 @@ void assert_maps_const(const cs540::Map<Key_T, Mapped_T> &my_map, const std::map
 void test_2(cs540::Map<int, int> &my_map, std::map<int, int> &their_map);
 void test_3(cs540::Map<int, int> &my_map, std::map<int, int> &their_map);
 
-void create_random_maps(cs540::Map<int, int> &my_map, std::map<int, int> &their_map) {
+template <typename Map_One_T, typename Map_Two_T>
+void create_equal_maps(Map_One_T &my_map, Map_Two_T &their_map, int num_elements) {
   assert(my_map.empty());
   assert(their_map.empty());
-  for (int i = 0; i < TEST_2_COUNT; ++ i) {
+  for (int i = 0; i < num_elements; ++ i) {
 	std::pair<int, int> to_insert(dist_(gen_), dist_(gen_));
 	auto my_it = my_map.insert(to_insert);
 	auto their_it = their_map.insert(to_insert);
@@ -106,18 +109,18 @@ void create_random_maps(cs540::Map<int, int> &my_map, std::map<int, int> &their_
   assert_maps(my_map, their_map);
 }
 
-void equal_maps(cs540::Map<int, int> &first, cs540::Map<int, int> &second) {
-  assert(first.empty());
-  assert(second.empty());
-  for (int i = 0; i < TEST_2_COUNT; ++ i) {
-	std::pair<int, int> to_insert(dist_(gen_), dist_(gen_));
-	auto my_it = first.insert(to_insert);
-	auto their_it = second.insert(to_insert);
-	assert(my_it.second == their_it.second);
+template <typename Map_One_T, typename Map_Two_T>
+void create_unequal_maps(Map_One_T &my_map, Map_Two_T &their_map, int num_elements) {
+  assert(my_map.empty());
+  assert(their_map.empty());
+  for (int i = 0; i < num_elements; ++ i) {
+	std::pair<int, int> my_insert(dist_(gen_), dist_(gen_));
+	std::pair<int, int> their_insert(dist_(gen_), dist_(gen_));	
+	auto my_it = my_map.insert(my_insert);
+	auto their_it = their_map.insert(their_insert);
   }
-  assert(!first.empty());
-  assert(!second.empty());
-  assert_maps(first, second);
+  assert(!my_map.empty());
+  assert(!their_map.empty());
 }
 
 void test_1() {
@@ -126,7 +129,7 @@ void test_1() {
    */
   cs540::Map<int, int> my_map;
   std::map<int, int> their_map;
-  create_random_maps(my_map, their_map);
+  create_equal_maps(my_map, their_map, TEST_2_COUNT);
   for (int i = 0; i < TEST_2_COUNT; ++ i) {
   	int key = dist_(gen_);
   	auto my_it = my_map.find(key);
