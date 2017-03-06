@@ -78,11 +78,11 @@ namespace cs540 {
 	SNode *find_node(const Key_T &key, SNode *current_element, size_t current_level);
 	
 	void print_map() {
-	  for (int i = skip_list_.size() - 1; i >=0 ; -- i) {
+	  for (int i = begin_sent_->next_.size() - 1; i >=0 ; -- i) {
 		std::cout << "Level: " << i << std::endl;
-		Node *head = skip_list_[i];
-		while (head != nullptr) {
-		  std::cout << head->pair_val_.first << " ";
+		SNode *head = begin_sent_->next_[i];
+		while (head != end_sent_) {
+		  std::cout << static_cast<Node *>(head)->pair_val_.first << " ";
 		  head = head->next_[i];
 		}
 		std::cout << std::endl;
@@ -331,8 +331,11 @@ namespace cs540 {
 	  Modifier
 	 */
 	std::pair<Iterator, bool> insert(const ValueType &value) {
+	  // std::cout << "(" << value.first << ", " << value.second << ")" << std::endl;
 	  double rand_dbl = dist_(gen_);
 	  size_t num_levels = get_number_levels(rand_dbl);
+	  // size_t num_levels = 0;
+	  // std::cout << num_levels << std::endl;
 	  Node *element = new Node(value.first, value.second, num_levels);
 	  // If current size of begin_sent_ and end_Sent_ is smaller than num_levels
 	  while (begin_sent_->next_.size() < num_levels + 1) {
@@ -343,9 +346,32 @@ namespace cs540 {
 	  }
 	  size_t min_index = std::min((size_t)begin_sent_->next_.size() - 1, num_levels);
 	  if (!insert_node(element, min_index)) {
-		delete element;
 		return std::make_pair(Iterator((Node *)nullptr), false);
 	  }
+	  // std::cout << "Increasing size" << std::endl;
+	  ++ size_;
+	  return std::make_pair(Iterator(element), true);
+	}
+
+	std::pair<Iterator, bool> insert(const ValueType &value, size_t num_levels) {
+	  // std::cout << "(" << value.first << ", " << value.second << ")" << std::endl;
+	  // double rand_dbl = dist_(gen_);
+	  // size_t num_levels = get_number_levels(rand_dbl);
+	  // size_t num_levels = 0;
+	  std::cout << num_levels << std::endl;
+	  Node *element = new Node(value.first, value.second, num_levels);
+	  // If current size of begin_sent_ and end_Sent_ is smaller than num_levels
+	  while (begin_sent_->next_.size() < num_levels + 1) {
+		begin_sent_->next_.push_back(end_sent_);
+		end_sent_->prev_.push_back(begin_sent_);
+		begin_sent_->prev_.push_back(nullptr);
+		end_sent_->next_.push_back(nullptr);
+	  }
+	  size_t min_index = std::min((size_t)begin_sent_->next_.size() - 1, num_levels);
+	  if (!insert_node(element, min_index)) {
+		return std::make_pair(Iterator((Node *)nullptr), false);
+	  }
+	  // std::cout << "Increasing size" << std::endl;
 	  ++ size_;
 	  return std::make_pair(Iterator(element), true);
 	}
@@ -359,33 +385,11 @@ namespace cs540 {
 	}
 	void erase(Iterator pos) {
 	  if (pos.node_ != nullptr) {
-	  	Node *node = pos.node_;
+	  	SNode *node = pos.node_;
 	  	for(unsigned int i = 0; i < node->prev_.size(); ++ i){
 	  	  if (node->next_[i] != nullptr) {
-	  	  	// Next is not null
-	  	  	if (node->prev_[i] != nullptr) {
-	  	  	  // Prev is not null
-			  // std::cout << "Case 1" << std::endl;
 	  	  	  node->prev_[i]->next_[i] = node->next_[i];
 			  node->next_[i]->prev_[i] = node->prev_[i];
-	  	  	} else {
-	  	  	  // Prev is null
-			  // std::cout << "Case 2" << std::endl;
-			  skip_list_[i] = node->next_[i];
-			  node->next_[i]->prev_[i] = nullptr;
-	  	  	}
-	  	  } else {
-	  	  	// Next is null
-	  	  	if (node->prev_[i] != nullptr) {
-	  	  	  // Prev is not null
-			  // std::cout << "Case 3" << std::endl;
-			  node->prev_[i]->next_[i] = nullptr;
-	  	  	} else {
-	  	  	  // Prev is null
-			  // std::cout << "Case 4" << std::endl;
-			  skip_list_.pop_back();
-			  // skip_list_[i] = nullptr;
-	  	  	}
 	  	  }
 	  	}
 		node->prev_.clear();
@@ -475,61 +479,58 @@ template <typename Key_T, typename Mapped_T>
 bool cs540::Map<Key_T, Mapped_T>::insert_node(
     cs540::Map<Key_T, Mapped_T>::Node *element,
 	size_t current_level) {
-  SNode *current_node = begin_sent_->next_[0];
-  while ()
+  // std::cout << "Starting current_level: " << current_level << std::endl;
+  // std::cout << "Inserting node" << std::endl;
+  auto current_element = begin_sent_->next_[current_level];
   bool need_to_insert = false;
-  if (current_element == end_sent_) {
-	need_to_insert = true;
-	//
-	if (current_level != 0) {
-	  if (!insert_node(element, current_element->prev_[current_level]->next_[current_level - 1], current_level - 1)) {
+  bool reached_end = false;
+  while (!reached_end && current_element != nullptr) {
+	// reached_end = current_level == 0;
+	if (current_element == end_sent_) {
+	  need_to_insert = true;
+	} else {
+	  // assert(element != nullptr);
+	  // assert(element != end_sent_);
+	  // assert(element != begin_sent_);
+	  // assert(current_element != nullptr);
+	  // assert(current_element != end_sent_);
+	  // assert(current_element != begin_sent_);
+	  if (element->pair_val_.first ==
+		  static_cast<Node *>(current_element)->pair_val_.first) {
+		erase(Iterator(element));
 		return false;
 	  }
-	}
-	element->next_[current_level] = current_element;
-	element->prev_[current_level] = current_element->prev_[current_level];
-	current_element->prev_[current_level]->next_[current_level] = element;
-	current_element->prev_[current_level] = element;
-	assert(element->next_[current_level]->prev_[current_level] == element);
-	assert(element->prev_[current_level]->next_[current_level] == element);
-	return true;
-	//
-  }
-  assert(element != nullptr);
-  assert(element != end_sent_);
-  assert(element != begin_sent_);
-  assert(current_element != nullptr);
-  assert(current_element != end_sent_);
-  assert(current_element != begin_sent_);
-  if (element->pair_val_.first == static_cast<Node *>(current_element)->pair_val_.first) return false;
-  if (element->pair_val_.first < static_cast<Node *>(current_element)->pair_val_.first) {
-	// Insert_Node element before current_element
-	need_to_insert = true;
-	if (current_level != 0) {
-	  if (!insert_node(element, current_element->prev_[current_level]->next_[current_level - 1], current_level - 1)) {
-		return false;
+	  if (element->pair_val_.first < static_cast<Node *>(current_element)->pair_val_.first) {
+		need_to_insert = true;
+	  } else {
+		current_element = current_element->next_[current_level];
 	  }
 	}
-  } else {
-	// Insert_Node element after current_element
-	if (!insert_node(element, current_element->next_[current_level], current_level)) {
-	  return false;
+	if (need_to_insert) {
+		element->next_[current_level] = current_element;
+		element->prev_[current_level] = current_element->prev_[current_level];
+		current_element->prev_[current_level]->next_[current_level] = element;
+		current_element->prev_[current_level] = element;
+		assert(element->next_[current_level]->prev_[current_level] == element);
+		assert(element->prev_[current_level]->next_[current_level] == element);
+		if (current_level != 0) {
+		  current_element = element->prev_[current_level]->next_[current_level - 1];
+		  -- current_level;
+		} else {
+		  reached_end = true;
+		}
 	}
+	need_to_insert = false;
   }
-  if (need_to_insert) {
-	element->next_[current_level] = current_element;
-	element->prev_[current_level] = current_element->prev_[current_level];
-	current_element->prev_[current_level]->next_[current_level] = element;
-	current_element->prev_[current_level] = element;
-	assert(element->next_[current_level]->prev_[current_level] == element);
-	assert(element->prev_[current_level]->next_[current_level] == element);
-  }
+  // std::cout << "Printing map" << std::endl;
+  // print();
+  // std::cout << "---------------" << std::endl;
   return true;
 }
 
 template <typename Key_T, typename Mapped_T>
-typename cs540::Map<Key_T, Mapped_T>::Node* cs540::Map<Key_T, Mapped_T>::find_node(
-    const Key_T &key, cs540::Map<Key_T, Mapped_T>::Node *current_element,
+typename cs540::Map<Key_T, Mapped_T>::SNode* cs540::Map<Key_T, Mapped_T>::find_node(
+    const Key_T &key, cs540::Map<Key_T, Mapped_T>::SNode *current_element,
     size_t current_level) {
   if (key == current_element->pair_val_.first) return current_element;
   if (key < current_element->pair_val_.first) {

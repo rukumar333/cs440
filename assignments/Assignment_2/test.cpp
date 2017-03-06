@@ -6,7 +6,7 @@
 #include "Map.hpp"
 
 #define UPPER_LIMIT 10000
-#define LOWER_LIMIT -10000
+#define LOWER_LIMIT 0
 
 #define TEST_2_COUNT 100000
 
@@ -45,7 +45,8 @@ void assert_maps(cs540::Map<Key_T, Mapped_T> &my_map, std::map<Key_T, Mapped_T> 
 	++ my_it;
 	++ their_it;
   }
-  assert(my_it == my_map.end() && their_it == their_map.end());
+  assert(my_it == my_map.end());
+  assert(their_it == their_map.end());
   /*
 	Iterate through w/ reverse pointers
   */  
@@ -73,27 +74,41 @@ void test_2() {
   std::map<int, int> their_map;
   for (int i = 0; i < TEST_2_COUNT; ++ i) {
 	std::pair<int, int> to_insert(dist_(gen_), dist_(gen_));
-	// std::cout << to_insert.first << " " << to_insert.second << std::endl;
+	// std::cout << to_insert.first << std::endl;
 	my_map.insert(to_insert);
-	// their_map.insert(to_insert);
+	their_map.insert(to_insert);
   }
-  // assert_maps(my_map, their_map);
+  // my_map.print();
+  assert_maps(my_map, their_map);
+}
+
+void test_3() {
+  cs540::Map<int, int> my_map;
+  my_map.insert(std::make_pair(0, 0), 0);
+  my_map.insert(std::make_pair(10, 0), 3);
+  my_map.insert(std::make_pair(2, 0), 0);
+  my_map.insert(std::make_pair(8, 0), 1);
+  my_map.insert(std::make_pair(3, 0), 1);
+  my_map.print();
+  // std::map<int, int> their_map;
+  
 }
 
 void test_class() {
-  cs540::Map<MyClass, int> my_map;
-  std::map<MyClass, int> their_map;
-  for (int i = 0; i < TEST_2_COUNT; ++ i) {
-	std::pair<MyClass, int> to_insert(MyClass(dist_(gen_)), dist_(gen_));
-	// std::cout << to_insert.first << " " << to_insert.second << std::endl;
-	my_map.insert(to_insert);
-	their_map.insert(to_insert);	
-  }
-  assert_maps(my_map, their_map);
+  // cs540::Map<MyClass, int> my_map;
+  // std::map<MyClass, int> their_map;
+  // for (int i = 0; i < TEST_2_COUNT; ++ i) {
+  // 	std::pair<MyClass, int> to_insert(MyClass(dist_(gen_)), dist_(gen_));
+  // 	// std::cout << to_insert.first << " " << to_insert.second << std::endl;
+  // 	my_map.insert(to_insert);
+  // 	their_map.insert(to_insert);	
+  // }
+  // assert_maps(my_map, their_map);
 }
 
 int main() {
   // test_class();
   test_2();
+  // test_3();
 }
 
