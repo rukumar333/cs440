@@ -73,9 +73,31 @@ namespace cs540 {
 	bool insert_node(Node *element, size_t current_level);
 	
 	SNode *find_node(const Key_T &key) {
-	  return find_node(key, begin_sent_->next_.back(), begin_sent_->next_.size() - 1);
+	  SNode *current_element = begin_sent_.next_.back();
+	  int current_level = begin_sent_->next_.size() - 1;
+	  // return find_node(key, begin_sent_->next_.back(), begin_sent_->next_.size() - 1);
+	  while (current_element != nullptr) {
+		if (current_element == end_sent_) {
+		  if (current_level == 0) {
+			return end_sent_;
+		  } else {
+			current_element = current_element->prev_[current_level]->next_[current_level - 1];
+			-- current_level;
+		  }
+		} else {
+		  Key_T current_key = static_cast<Node *>(current_element)->pair_val.first;
+		  if (key == current_key) return current_element;
+		  if (key < current_key) {
+			current_element = current_element->prev_[current_level]->next_[current_level - 1];
+			-- current_level;		
+		  } else {
+			current_element = current_element->next_[current_level];		
+		  } 
+		}
+	  }
+	  return end_sent_;
 	}
-	SNode *find_node(const Key_T &key, SNode *current_element, size_t current_level);
+	// SNode *find_node(const Key_T &key, SNode *current_element, size_t current_level);
 	
 	void print_map() {
 	  for (int i = begin_sent_->next_.size() - 1; i >=0 ; -- i) {
@@ -93,7 +115,7 @@ namespace cs540 {
 	/*
 	  Private Data Members
 	 */
-	std::vector<Node*> skip_list_;
+	// std::vector<Node*> skip_list_;
 	size_t size_;
 	std::random_device rand_dev_;
 	std::mt19937_64 gen_;
@@ -218,7 +240,7 @@ namespace cs540 {
 	/*
 	  Ctors, assignment, dtor
 	*/
-	Map() : skip_list_() , gen_(rand_dev_()), dist_(0.0, 1.0) {
+	Map() :  gen_(rand_dev_()), dist_(0.0, 1.0) {
 	  size_ = 0;
 	  begin_sent_ = new SNode();
 	  end_sent_ = new SNode();
@@ -228,7 +250,6 @@ namespace cs540 {
 	  
 	}
 	Map &operator=(const Map &other) {
-	  skip_list_.clear();
 	  size_ = other.size_;
 	}
 	Map(std::initializer_list<std::pair<const Key_T, Mapped_T>>) {
@@ -236,8 +257,6 @@ namespace cs540 {
 	}
 	~Map() {
 	  delete begin_sent_;
-	  // if(skip_list_.size() > 0)
-	  // 	delete skip_list_[0];
 	}
 	/*
 	  Size
@@ -249,16 +268,12 @@ namespace cs540 {
 	 */
 	Iterator begin() {
 	  return Iterator(begin_sent_->next_[0]);
-	  // if(begin_sent_->.size() > 0) return Iterator(skip_list_[0]);
-	  // else return Iterator();
 	}
 	Iterator end() {
 	  return Iterator(end_sent_);
 	}
 	ConstIterator begin() const {
 	  return ConstIterator(begin_sent_->next_[0]);
-	  // if(skip_list_.size() > 0) return ConstIterator(skip_list_[0]);
-	  // else return ConstIterator();	  
 	}
 	ConstIterator end() const {
 	  return ConstIterator(end_sent_);
@@ -273,58 +288,40 @@ namespace cs540 {
 	  Element Access
 	 */
 	Iterator find(const Key_T &key) {
-	  if (skip_list_.size() == 0) {
-		return end();
-	  } else {
-		return Iterator(find_node(key));
-	  }
+	  return Iterator(find_node(key));
+	  // if (skip_list_.size() == 0) {
+	  // 	return end();
+	  // } else {
+	  // 	return Iterator(find_node(key));
+	  // }
 	}
 	ConstIterator find(const Key_T &key) const {
-	  if (skip_list_.size() == 0) {
-		return end();
-	  } else {
-		return ConstIterator(find_node(key));
-	  }	  
+	  return ConstIterator(find_node(key));
 	}
 	Mapped_T &at(const Key_T &key) {
-	  if (skip_list_.size() == 0) {
-		throw std::out_of_range("Map is empty");
+	  SNode *ptr = find_node(key);
+	  if (ptr == end_sent_) {
+		throw std::out_of_range("Key not located in map");		
 	  } else {
-		Node *ptr = find_node(key);
-		if (ptr != nullptr) {
-		  return ptr->pair_val_.second;
-		} else {
-		  throw std::out_of_range("Key not located in map");
-		}
+		return static_cast<Node *>(ptr)->pair_val_.second;
 	  }
 	}
 	const Mapped_T &at(const Key_T &key) const {
-	  if (skip_list_.size() == 0) {
-		throw std::out_of_range("Map is empty");
+	  SNode *ptr = find_node(key);
+	  if (ptr == end_sent_) {
+		throw std::out_of_range("Key not located in map");		
 	  } else {
-		Node *ptr = find_node(key);
-		if (ptr != nullptr) {
-		  return ptr->pair_val_.second;
-		} else {
-		  throw std::out_of_range("Key not located in map");
-		}
-	  }	  
+		return static_cast<Node *>(ptr)->pair_val_.second;
+	  } 
 	}
 	Mapped_T &operator[](const Key_T &key) {
-	  bool need_to_insert = false;
-	  if (skip_list_.size() == 0) {
-		need_to_insert = true;
-	  }
-	  Node *ptr = find_node(key);
-	  if (ptr == nullptr) {
-		need_to_insert = true;
-	  } else {
-		return ptr->pair_val_.second;
-	  }
-	  if (need_to_insert) {
+	  SNode *ptr = find_node(key);
+	  if (ptr == end_sent_) {
 		ValueType to_insert(key, Mapped_T());
 		std::pair<Iterator, bool> result = insert(to_insert);
-		return result.first.node_->pair_val_.second;
+		return result.first.node_->pair_val_.second;		
+	  } else {
+		return static_cast<Node *>(ptr)->pair_val_.second;
 	  }
 	}
 	/*
@@ -406,11 +403,14 @@ namespace cs540 {
 	  }
 	}
 	void clear() {
-	  if (skip_list_.size() != 0) {
-		delete skip_list_[0];
-		skip_list_.clear();
-		size_ = 0;
-	  }
+	  delete begin_sent_;
+	  begin_sent_ = new SNode();
+	  end_sent_ = new SNode();
+	  // if (skip_list_.size() != 0) {
+	  // 	delete skip_list_[0];
+	  // 	skip_list_.clear();
+	  // 	size_ = 0;
+	  // }
 	}
 	/*
 	  Comparison
@@ -485,7 +485,6 @@ bool cs540::Map<Key_T, Mapped_T>::insert_node(
   bool need_to_insert = false;
   bool reached_end = false;
   while (!reached_end && current_element != nullptr) {
-	// reached_end = current_level == 0;
 	if (current_element == end_sent_) {
 	  need_to_insert = true;
 	} else {
@@ -511,8 +510,6 @@ bool cs540::Map<Key_T, Mapped_T>::insert_node(
 		element->prev_[current_level] = current_element->prev_[current_level];
 		current_element->prev_[current_level]->next_[current_level] = element;
 		current_element->prev_[current_level] = element;
-		assert(element->next_[current_level]->prev_[current_level] == element);
-		assert(element->prev_[current_level]->next_[current_level] == element);
 		if (current_level != 0) {
 		  current_element = element->prev_[current_level]->next_[current_level - 1];
 		  -- current_level;
@@ -522,48 +519,67 @@ bool cs540::Map<Key_T, Mapped_T>::insert_node(
 	}
 	need_to_insert = false;
   }
-  // std::cout << "Printing map" << std::endl;
-  // print();
-  // std::cout << "---------------" << std::endl;
   return true;
 }
 
-template <typename Key_T, typename Mapped_T>
-typename cs540::Map<Key_T, Mapped_T>::SNode* cs540::Map<Key_T, Mapped_T>::find_node(
-    const Key_T &key, cs540::Map<Key_T, Mapped_T>::SNode *current_element,
-    size_t current_level) {
-  if (key == current_element->pair_val_.first) return current_element;
-  if (key < current_element->pair_val_.first) {
-	// Searching element before current_element
-	if (current_element == skip_list_[current_level]) {
-	  // Searching at head
-	  if (current_level != 0) {
-		return find_node(key, skip_list_[current_level - 1], current_level - 1);
-	  } else {
-		return nullptr;
-	  }
-	} else {
-	  // Searching not at head
-	  if (current_level != 0) {
-		return find_node(key, current_element->prev_[current_level], current_level - 1);
-	  } else {
-		return nullptr;
-	  }
-	}
-  } else {
-	// Search element after current_element
-	if (current_element->next_[current_level] == nullptr) {
-	  // Next is null
-	  if (current_level != 0) {
-		return find_node(key, current_element, current_level - 1);
-	  } else {
-		return nullptr;
-	  }
-	} else {
-	  return find_node(key, current_element->next_[current_level], current_level);
-	}
-  }
-}
+// template <typename Key_T, typename Mapped_T>
+// typename cs540::Map<Key_T, Mapped_T>::SNode *
+// cs540::Map<Key_T, Mapped_T>::find_node(const Key_T &key) {
+//   SNode *current_element = begin_sent_.next_.back();
+//   int current_level = begin_sent_->next_.size() - 1;
+//   // return find_node(key, begin_sent_->next_.back(), begin_sent_->next_.size() - 1);
+//   while (current_element != nullptr) {
+// 	if (current_element == end_sent_) {
+// 	  if (current_level == 0) {
+// 		return end_sent_;
+// 	  } else {
+// 		current_element = current_element->prev_[current_level]->next_[current_level - 1];
+// 		-- current_level;
+// 	  }
+// 	} else {
+// 	  current_key = static_cast<Node *>(current_element)->pair_val.first;
+// 	  if (key == current_key) return current_element;
+// 	  if (key < current_key) {
+// 		current_element = current_element->prev_[current_level]->next_[current_level - 1];
+// 		-- current_level;		
+// 	  } else {
+// 		current_element = current_element->next_[current_level];		
+// 	  } 
+// 	}
+//   }
+//   return end_sent_;
+//   // if (key == current_element->pair_val_.first) return current_element;
+//   // if (key < current_element->pair_val_.first) {
+//   // 	// Searching element before current_element
+//   // 	if (current_element == skip_list_[current_level]) {
+//   // 	  // Searching at head
+//   // 	  if (current_level != 0) {
+//   // 		return find_node(key, skip_list_[current_level - 1], current_level - 1);
+//   // 	  } else {
+//   // 		return nullptr;
+//   // 	  }
+//   // 	} else {
+//   // 	  // Searching not at head
+//   // 	  if (current_level != 0) {
+//   // 		return find_node(key, current_element->prev_[current_level], current_level - 1);
+//   // 	  } else {
+//   // 		return nullptr;
+//   // 	  }
+//   // 	}
+//   // } else {
+//   // 	// Search element after current_element
+//   // 	if (current_element->next_[current_level] == nullptr) {
+//   // 	  // Next is null
+//   // 	  if (current_level != 0) {
+//   // 		return find_node(key, current_element, current_level - 1);
+//   // 	  } else {
+//   // 		return nullptr;
+//   // 	  }
+//   // 	} else {
+//   // 	  return find_node(key, current_element->next_[current_level], current_level);
+//   // 	}
+//   }
+// }
 
 // template <typename Key_T, typename Mapped_T>
 // void cs540::Map<Key_T, Mapped_T>::copy_map(const Map &other) {
