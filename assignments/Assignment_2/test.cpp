@@ -143,13 +143,41 @@ void test_4() {
   	assert((my_it == my_map.end()) == (their_it == their_map.end()));
   	if (my_it != my_map.end()) {
   	  assert(my_it->second == their_it->second);
-  	}
+	  int &my_int = my_map.at(key);
+	  int &their_int = their_map.at(key);
+	  assert(my_int == their_int);
+	  ++ my_int;
+	  assert(my_map.at(key) == their_map.at(key) + 1);
+	  ++ their_int;
+	  assert(my_map.at(key) == their_map.at(key));
+  	} else {
+	  try {
+		int x = my_map.at(key);
+		/*
+		  Code should never get here
+		 */
+		++ x;
+		assert(false);
+	  } catch (const std::out_of_range &e) {
+		
+	  } catch (...) {
+		/*
+		  Should be throwing out_of_range exception
+		 */
+		assert(false);
+	  }
+	}
 	cs540::Map<int, int>::ConstIterator const_my_it = my_map.find(key);
 	std::map<int, int>::const_iterator const_their_it = their_map.find(key);
 	assert((const_my_it == my_map.end()) == (const_their_it == their_map.end()));
 	if (const_my_it != my_map.end()) {
   	  assert(const_my_it->second == const_their_it->second);
   	}
+  }
+  assert_maps(my_map, their_map);
+  std::cout << "Completed test 4" << std::endl;
+  if (int i = 0; i < TEST_2_COUNT; ++ i) {
+  	// unsigned int 
   }
 }
 

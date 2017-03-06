@@ -305,7 +305,7 @@ namespace cs540 {
 	Mapped_T &at(const Key_T &key) {
 	  SNode *ptr = find_node(key);
 	  if (ptr == end_sent_) {
-		throw std::out_of_range("Key not located in map");		
+		throw std::out_of_range("Key not located in map");
 	  } else {
 		return static_cast<Node *>(ptr)->pair_val_.second;
 	  }
