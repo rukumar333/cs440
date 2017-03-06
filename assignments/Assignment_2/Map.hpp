@@ -421,7 +421,7 @@ namespace cs540 {
 	  auto first_it = first.begin();
 	  auto second_it = second.begin();
 	  while (first_it != first.end() && second_it != second.end()) {
-		if (*first_it > *second_it) {
+		if (*second_it < *first_it) {
 		  return false;
 		}
 		if (*first_it < *second_it) {
