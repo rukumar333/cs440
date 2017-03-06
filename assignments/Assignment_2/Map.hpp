@@ -41,21 +41,9 @@ namespace cs540 {
 	 */
 	class Node : public SNode {
 	 public:
-	  // const Key_T key_;
-	  // Mapped_T value_;
 	  std::pair<const Key_T, Mapped_T> pair_val_;
-	  // std::vector<Node *> next_;
-	  // std::vector<Node *> prev_;
-	  // Node(Key_T key, Mapped_T value, size_t num_levels)
-	  // 	: pair_val_(key, value), next_(num_levels + 1, nullptr),
-	  // 	  prev_(num_levels + 1, nullptr){}
 	  Node(Key_T key, Mapped_T value, size_t num_levels)
 	  	: SNode(num_levels), pair_val_(key, value){}
-	  // ~Node() {
-	  // 	if (this->next_.size() != 0) {
-	  // 	  delete this->next_[0];
-	  // 	}
-	  // }
 	};
 
 	/*
@@ -75,7 +63,6 @@ namespace cs540 {
 	SNode *find_node(const Key_T &key) {
 	  SNode *current_element = begin_sent_->next_.back();
 	  int current_level = begin_sent_->next_.size() - 1;
-	  // return find_node(key, begin_sent_->next_.back(), begin_sent_->next_.size() - 1);
 	  while (current_element != nullptr) {
 		if (current_element == end_sent_) {
 		  if (current_level == 0) {
@@ -118,12 +105,10 @@ namespace cs540 {
 	/*
 	  Private Data Members
 	 */
-	// std::vector<Node*> skip_list_;
 	size_t size_;
 	std::random_device rand_dev_;
 	std::mt19937_64 gen_;
 	std::uniform_real_distribution<double> dist_;
-	// ReverseIterator end_;
 	SNode *begin_sent_;
 	SNode *end_sent_;
    public:
@@ -131,9 +116,7 @@ namespace cs540 {
 	void print() {
 	  print_map();
 	}
-	// size_t get_max_levels() {
-	//   return begin_sent_->next_.size();
-	// }
+
 	class Iterator : public ConstIterator{
 	  friend class Map;
 	  friend class ConstIterator;
@@ -298,11 +281,6 @@ namespace cs540 {
 	 */
 	Iterator find(const Key_T &key) {
 	  return Iterator(find_node(key));
-	  // if (skip_list_.size() == 0) {
-	  // 	return end();
-	  // } else {
-	  // 	return Iterator(find_node(key));
-	  // }
 	}
 	ConstIterator find(const Key_T &key) const {
 	  return ConstIterator(find_node(key));
@@ -337,11 +315,8 @@ namespace cs540 {
 	  Modifier
 	 */
 	std::pair<Iterator, bool> insert(const ValueType &value) {
-	  // std::cout << "(" << value.first << ", " << value.second << ")" << std::endl;
 	  double rand_dbl = dist_(gen_);
 	  size_t num_levels = get_number_levels(rand_dbl);
-	  // size_t num_levels = 0;
-	  // std::cout << num_levels << std::endl;
 	  Node *element = new Node(value.first, value.second, num_levels);
 	  // If current size of begin_sent_ and end_Sent_ is smaller than num_levels
 	  while (begin_sent_->next_.size() < num_levels + 1) {
@@ -358,19 +333,9 @@ namespace cs540 {
 	  } else {
 		return std::make_pair(Iterator(ptr), false);	  
 	  }
-	  // if (!insert_node(element, min_index)) {
-	  // 	return std::make_pair(Iterator((Node *)nullptr), false);
-	  // }
-	  // // std::cout << "Increasing size" << std::endl;
-	  // ++ size_;
-	  // return std::make_pair(Iterator(element), true);
 	}
 
 	std::pair<Iterator, bool> insert(const ValueType &value, size_t num_levels) {
-	  // std::cout << "(" << value.first << ", " << value.second << ")" << std::endl;
-	  // double rand_dbl = dist_(gen_);
-	  // size_t num_levels = get_number_levels(rand_dbl);
-	  // size_t num_levels = 0;
 	  std::cout << num_levels << std::endl;
 	  Node *element = new Node(value.first, value.second, num_levels);
 	  // If current size of begin_sent_ and end_Sent_ is smaller than num_levels
@@ -384,7 +349,6 @@ namespace cs540 {
 	  if (!insert_node(element, min_index)) {
 		return std::make_pair(Iterator((Node *)nullptr), false);
 	  }
-	  // std::cout << "Increasing size" << std::endl;
 	  ++ size_;
 	  return std::make_pair(Iterator(element), true);
 	}
@@ -421,7 +385,6 @@ namespace cs540 {
 	}
 	void clear() {
 	  delete begin_sent_;
-	  // delete end_sent_;
 	  begin_sent_ = new SNode();
 	  end_sent_ = new SNode();
 	  begin_sent_->next_.push_back(end_sent_);
@@ -429,81 +392,53 @@ namespace cs540 {
 	  end_sent_->next_.push_back(nullptr);
 	  end_sent_->prev_.push_back(begin_sent_);
 	  size_ = 0;
-	  // if (skip_list_.size() != 0) {
-	  // 	delete skip_list_[0];
-	  // 	skip_list_.clear();
-	  // 	size_ = 0;
-	  // }
 	}
 	/*
 	  Comparison
 	*/
+	friend bool operator==(const Map &first, const Map &second) {
+	  auto first_it = first.begin();
+	  auto second_it = second.begin();
+	  while (first_it != first.end() && second_it != second.end()) {
+		// if (first_it->first != second_it->first || first_it->second != second_it->second) {
+		if (*first_it != *second_it) {
+		  return false;
+		}
+		++ first_it;
+		++ second_it;
+	  }
+	  if (first_it != first.end() || second_it != second.end()) {
+		return false;
+	  }
+	  return true;
+	}
+
+	friend bool operator!=(const Map &first, const Map &second) {
+	  return !(first == second);
+	}
+
+	friend bool operator<(const Map &first, const Map &second) {
+	  auto first_it = first.begin();
+	  auto second_it = second.begin();
+	  while (first_it != first.end() && second_it != second.end()) {
+		if (*first_it > *second_it) {
+		  return false;
+		}
+		if (*first_it < *second_it) {
+		  return true;
+		}
+		++ first_it;
+		++ second_it;
+	  }
+	  return first.size() < second.size();
+	}
   };
 }
-
-// template <typename Key_T, typename Mapped_T>
-// bool operator==(const cs540::Map<Key_T, Mapped_T> &first,
-//                 const cs540::Map<Key_T, Mapped_T> &second);
-// template <typename Key_T, typename Mapped_T>
-// bool operator!=(const cs540::Map<Key_T, Mapped_T> &first,
-//                 const cs540::Map<Key_T, Mapped_T> &second);
-// template <typename Key_T, typename Mapped_T>
-// bool operator<(const cs540::Map<Key_T, Mapped_T> &first,
-//                const cs540::Map<Key_T, Mapped_T> &second);
-
-// template <typename Key_T, typename Mapped_T>
-// bool operator==(const typename cs540::Map<Key_T, Mapped_T>::Iterator first,
-//                 const typename cs540::Map<Key_T, Mapped_T>::Iterator second) {
-//   return first->node_ == second->node_;
-//   // return true;
-// }
-
-// template <typename Key_T, typename Mapped_T>
-// bool operator==(
-//     const typename cs540::Map<Key_T, Mapped_T>::ConstIterator &first,
-//     const typename cs540::Map<Key_T, Mapped_T>::ConstIterator &second);
-// template <typename Key_T, typename Mapped_T>
-// bool operator==(
-//     const typename cs540::Map<Key_T, Mapped_T>::Iterator &first,
-//     const typename cs540::Map<Key_T, Mapped_T>::ConstIterator &second);
-// template <typename Key_T, typename Mapped_T>
-// bool operator==(
-//     const typename cs540::Map<Key_T, Mapped_T>::ConstIterator &first,
-//     const typename cs540::Map<Key_T, Mapped_T>::Iterator &second);
-
-// template <typename Key_T, typename Mapped_T>
-// bool operator!=(const typename cs540::Map<Key_T, Mapped_T>::Iterator &first,
-//                 const typename cs540::Map<Key_T, Mapped_T>::Iterator &second) {
-//   return !(first == second);
-// }
-
-// template <typename Key_T, typename Mapped_T>
-// bool operator!=(
-//     const typename cs540::Map<Key_T, Mapped_T>::ConstIterator &first,
-//     const typename cs540::Map<Key_T, Mapped_T>::ConstIterator &second);
-// template <typename Key_T, typename Mapped_T>
-// bool operator!=(
-//     const typename cs540::Map<Key_T, Mapped_T>::Iterator &first,
-//     const typename cs540::Map<Key_T, Mapped_T>::ConstIterator &second);
-// template <typename Key_T, typename Mapped_T>
-// bool operator!=(
-//     const typename cs540::Map<Key_T, Mapped_T>::ConstIterator &first,
-//     const typename cs540::Map<Key_T, Mapped_T>::Iterator &second);
-// template <typename Key_T, typename Mapped_T>
-// bool operator==(
-//     const typename cs540::Map<Key_T, Mapped_T>::ReverseIterator &first,
-//     const typename cs540::Map<Key_T, Mapped_T>::ReverseIterator &second);
-// template <typename Key_T, typename Mapped_T>
-// bool operator!=(
-//     const typename cs540::Map<Key_T, Mapped_T>::ReverseIterator &first,
-//     const typename cs540::Map<Key_T, Mapped_T>::ReverseIterator &second);
 
 template <typename Key_T, typename Mapped_T>
 typename cs540::Map<Key_T, Mapped_T>::SNode *cs540::Map<Key_T, Mapped_T>::insert_node(
     cs540::Map<Key_T, Mapped_T>::Node *element,
 	size_t current_level) {
-  // std::cout << "Starting current_level: " << current_level << std::endl;
-  // std::cout << "Inserting node" << std::endl;
   auto current_element = begin_sent_->next_[current_level];
   bool need_to_insert = false;
   bool reached_end = false;
@@ -511,12 +446,6 @@ typename cs540::Map<Key_T, Mapped_T>::SNode *cs540::Map<Key_T, Mapped_T>::insert
 	if (current_element == end_sent_) {
 	  need_to_insert = true;
 	} else {
-	  // assert(element != nullptr);
-	  // assert(element != end_sent_);
-	  // assert(element != begin_sent_);
-	  // assert(current_element != nullptr);
-	  // assert(current_element != end_sent_);
-	  // assert(current_element != begin_sent_);
 	  if (element->pair_val_.first ==
 		  static_cast<Node *>(current_element)->pair_val_.first) {
 		erase(Iterator(element));
@@ -544,31 +473,5 @@ typename cs540::Map<Key_T, Mapped_T>::SNode *cs540::Map<Key_T, Mapped_T>::insert
   }
   return element;
 }
-
-// template <typename Key_T, typename Mapped_T>
-// void cs540::Map<Key_T, Mapped_T>::copy_map(const Map &other) {
-//   size_ = other.size_;
-//   Node *current = other.skip_list_[0];
-//   while (current != nullptr) {
-// 	int num_levels = current->prev_.size();
-// 	Node *element = new Node(current->value.first, current->value.second, current->prev_.size());
-// 	if (skip_list_.size() == 0) {
-// 	  // Initial inserts
-// 	  while (skip_list_.size() < num_levels + 1) {
-// 		skip_list_.push_back(element);
-// 	  }
-// 	  end_.node_ = element;
-// 	} else {
-// 	  size_t min_index = std::min((size_t)skip_list_.size() - 1, num_levels);
-// 	  insert_node(element, skip_list_[min_index], min_index);
-// 	  while (skip_list_.size() < num_levels + 1) {
-// 		skip_list_.push_back(element);
-// 	  }		
-// 	}
-// 	++ size_;
-// 	return std::make_pair(Iterator(element), true);
-	
-//   }
-// }
 
 #endif

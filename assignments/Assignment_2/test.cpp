@@ -106,6 +106,20 @@ void create_random_maps(cs540::Map<int, int> &my_map, std::map<int, int> &their_
   assert_maps(my_map, their_map);
 }
 
+void equal_maps(cs540::Map<int, int> &first, cs540::Map<int, int> &second) {
+  assert(first.empty());
+  assert(second.empty());
+  for (int i = 0; i < TEST_2_COUNT; ++ i) {
+	std::pair<int, int> to_insert(dist_(gen_), dist_(gen_));
+	auto my_it = first.insert(to_insert);
+	auto their_it = second.insert(to_insert);
+	assert(my_it.second == their_it.second);
+  }
+  assert(!first.empty());
+  assert(!second.empty());
+  assert_maps(first, second);
+}
+
 void test_1() {
   /*
 	Test element access
@@ -222,8 +236,21 @@ void test_2(cs540::Map<int, int> &my_map, std::map<int, int> &their_map) {
 	}
   }
   my_map.clear();
-  // assert(my_map.size() == 0);
-  // assert(my_map.empty());
+  assert(my_map.size() == 0);
+  assert(my_map.empty());
+  auto it = their_map.begin();
+  while (it != their_map.end()) {
+	my_map.insert(*it);
+	++ it;
+  }
+  assert_maps(my_map, their_map);
+}
+
+void test_3() {
+  /*
+	Test Map comparison
+   */
+  
 }
 
 void test_class() {
