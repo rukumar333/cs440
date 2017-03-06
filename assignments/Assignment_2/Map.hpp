@@ -101,7 +101,6 @@ namespace cs540 {
 	  }
 	  return end_sent_;
 	}
-	// SNode *find_node(const Key_T &key, SNode *current_element, size_t current_level);
 	
 	void print_map() {
 	  for (int i = begin_sent_->next_.size() - 1; i >=0 ; -- i) {
@@ -250,6 +249,10 @@ namespace cs540 {
 	  size_ = 0;
 	  begin_sent_ = new SNode();
 	  end_sent_ = new SNode();
+	  begin_sent_->next_.push_back(end_sent_);
+	  begin_sent_->prev_.push_back(nullptr);
+	  end_sent_->next_.push_back(nullptr);
+	  end_sent_->prev_.push_back(begin_sent_);
 	}
 	Map(const Map &other) {
 	  size_ = other.size_;
@@ -347,10 +350,10 @@ namespace cs540 {
 		begin_sent_->prev_.push_back(nullptr);
 		end_sent_->next_.push_back(nullptr);
 	  }
+	  ++ size_;
 	  size_t min_index = std::min((size_t)begin_sent_->next_.size() - 1, num_levels);
 	  SNode *ptr = insert_node(element, min_index);
 	  if (ptr == element) {
-		++ size_;
 		return std::make_pair(Iterator(ptr), true);
 	  } else {
 		return std::make_pair(Iterator(ptr), false);	  
@@ -394,7 +397,7 @@ namespace cs540 {
 	  }
 	}
 	void erase(Iterator pos) {
-	  if (pos.node_ != nullptr) {
+	  if (pos.node_ != nullptr && pos.node_ != end_sent_ && pos.node_ != begin_sent_) {
 	  	SNode *node = pos.node_;
 	  	for(unsigned int i = 0; i < node->prev_.size(); ++ i){
 	  	  if (node->next_[i] != nullptr) {
@@ -405,11 +408,12 @@ namespace cs540 {
 		node->prev_.clear();
 		node->next_.clear();
 		delete node;
+		-- size_;
 	  }
 	}
 	void erase(const Key_T &key) {
-	  Node *ptr = find_node(key);
-	  if (ptr == nullptr) {
+	  SNode *ptr = find_node(key);
+	  if (ptr == end_sent_) {
 		throw std::out_of_range("Key not located in map");
 	  } else {
 		erase(Iterator(ptr));
@@ -417,8 +421,13 @@ namespace cs540 {
 	}
 	void clear() {
 	  delete begin_sent_;
+	  // delete end_sent_;
 	  begin_sent_ = new SNode();
 	  end_sent_ = new SNode();
+	  begin_sent_->next_.push_back(end_sent_);
+	  begin_sent_->prev_.push_back(nullptr);
+	  end_sent_->next_.push_back(nullptr);
+	  end_sent_->prev_.push_back(begin_sent_);
 	  size_ = 0;
 	  // if (skip_list_.size() != 0) {
 	  // 	delete skip_list_[0];

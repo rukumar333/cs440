@@ -8,7 +8,7 @@
 #define UPPER_LIMIT 1000
 #define LOWER_LIMIT -1000
 
-#define TEST_2_COUNT 10000
+#define TEST_2_COUNT 5000
 
 std::random_device rand_dev_;
 std::mt19937_64 gen_(rand_dev_());
@@ -33,6 +33,8 @@ void assert_maps(cs540::Map<Key_T, Mapped_T> &my_map, std::map<Key_T, Mapped_T> 
   /*
 	Size should be the same
    */
+  // std::cout << my_map.size() << std::endl;
+  // std::cout << their_map.size() << std::endl; 
   assert(my_map.size() == their_map.size());
   /*
 	Iterate through w/ forward pointers
@@ -95,8 +97,9 @@ void create_random_maps(cs540::Map<int, int> &my_map, std::map<int, int> &their_
   assert(their_map.empty());
   for (int i = 0; i < TEST_2_COUNT; ++ i) {
 	std::pair<int, int> to_insert(dist_(gen_), dist_(gen_));
-	my_map.insert(to_insert);
-	their_map.insert(to_insert);
+	auto my_it = my_map.insert(to_insert);
+	auto their_it = their_map.insert(to_insert);
+	assert(my_it.second == their_it.second);
   }
   assert(!my_map.empty());
   assert(!their_map.empty());
@@ -160,9 +163,11 @@ void test_2(cs540::Map<int, int> &my_map, std::map<int, int> &their_map) {
   /*
 	Test modifier
    */
-  std::uniform_int_distribution<int> dist_test(LOWER_LIMIT * 2, UPPER_LIMIT * 2);
-  for(int i = 0; i < TEST_2_COUNT / 2; ++ i){
-	std::pair<int, int> to_insert(dist_test(gen_), dist_test(gen_));
+  std::uniform_int_distribution<int> dist_test_two(LOWER_LIMIT * 2, UPPER_LIMIT * 2);
+  std::uniform_int_distribution<int> dist_test_four(LOWER_LIMIT * 4, UPPER_LIMIT * 4);
+  std::uniform_int_distribution<int> dist_test_half(LOWER_LIMIT / 2, UPPER_LIMIT / 2);
+  for (int i = 0; i < TEST_2_COUNT / 2; ++ i) {
+	std::pair<int, int> to_insert(dist_test_two(gen_), dist_test_two(gen_));
 	auto my_ret = my_map.insert(to_insert);
 	auto their_ret = their_map.insert(to_insert);
 	// std::cout << my_ret.second << std::endl;
@@ -170,7 +175,55 @@ void test_2(cs540::Map<int, int> &my_map, std::map<int, int> &their_map) {
 	assert(my_ret.first->first == their_ret.first->first);
 	assert(my_ret.first->second == their_ret.first->second);
   }
-  
+  assert_maps(my_map, their_map);
+  std::vector<std::pair<int, int> > vec;
+  for (int i = 0; i < TEST_2_COUNT / 2; ++ i) {
+	vec.push_back(std::make_pair(dist_test_four(gen_), dist_test_four(gen_)));
+  }
+  /*
+	Should not insert anything;
+   */
+  my_map.insert(vec.end(), vec.end());
+  assert(my_map.size() == their_map.size());
+  my_map.insert(vec.begin(), vec.end());
+  assert(my_map.size() != their_map.size());
+  their_map.insert(vec.begin(), vec.end());
+  assert_maps(my_map, their_map);
+  for (int i = 0; i < TEST_2_COUNT; ++ i) {
+  	int key = dist_test_half(gen_);
+  	auto my_it = my_map.find(key);
+  	auto their_it = their_map.find(key);
+	assert((my_it == my_map.end()) == (their_it == their_map.end()));
+  	if (key % 2 == 0) {
+  	  if (my_it != my_map.end()) {
+  		my_map.erase(my_it);
+		their_map.erase(their_it);
+  	  }
+  	} else {
+  	  if (my_it != my_map.end()) {
+  		my_map.erase(key);
+		their_map.erase(key);
+  	  } else {
+		try {
+		  my_map.erase(key);
+		  /*
+			Should never get here
+		   */
+		  assert(false);
+		} catch (const std::out_of_range &e) {
+		  
+		} catch (...) {
+		  /*
+			Should be throwing out_of_range exception
+		  */
+		  assert(false);
+		}
+	  }
+	}
+  }
+  my_map.clear();
+  // assert(my_map.size() == 0);
+  // assert(my_map.empty());
 }
 
 void test_class() {
