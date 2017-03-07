@@ -303,6 +303,26 @@ void test_3() {
 	create_equal_maps(my_first, my_second, TEST_2_COUNT / 2);
 	assert(my_first == my_second);
 	assert(!(my_first != my_second));
+	auto it = my_first.rbegin();
+	switch (i % 3) {
+	case 0:
+	  my_first.insert(std::make_pair(UPPER_LIMIT + 10, UPPER_LIMIT + 10));
+	  assert(my_second < my_first);
+	  assert(!(my_first < my_second));
+	  break;
+	case 1:
+	  ++ it;
+	  it->second = UPPER_LIMIT + 10;
+	  assert(my_second < my_first);
+	  assert(my_second != my_first);
+	  break;
+	case 2:
+	  ++ it;
+	  it->second = LOWER_LIMIT - 10;
+	  assert(my_first < my_second);
+	  assert(my_first != my_second);
+	  break;
+	}
 	my_first.clear();
 	my_second.clear();
   }

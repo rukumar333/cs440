@@ -474,9 +474,9 @@ typename cs540::Map<Key_T, Mapped_T>::SNode *cs540::Map<Key_T, Mapped_T>::insert
   return element;
 }
 
-// template <typename Key_T, typename Mapped_T>
-// void cs540::Map<Key_T, Mapped_T>::copy_map(const Map<Key_T, Mapped_T> &other) {
+template <typename Key_T, typename Mapped_T>
+void cs540::Map<Key_T, Mapped_T>::copy_map(const Map<Key_T, Mapped_T> &other) {
   
-// }
+}
 
 #endif
