@@ -237,12 +237,28 @@ namespace cs540 {
 	  end_sent_->next_.push_back(nullptr);
 	  end_sent_->prev_.push_back(begin_sent_);
 	}
-	Map(const Map &other) {
+	Map(const Map &other) : gen_(rand_dev_()), dist_(0.0, 1.0) {
+	  begin_sent_ = new SNode();
+	  end_sent_ = new SNode();
+	  begin_sent_->next_.push_back(end_sent_);
+	  begin_sent_->prev_.push_back(nullptr);
+	  end_sent_->next_.push_back(nullptr);
+	  end_sent_->prev_.push_back(begin_sent_);
 	  size_ = other.size_;
-	  
+	  copy_map(other);
 	}
 	Map &operator=(const Map &other) {
-	  size_ = other.size_;
+	  if (this != &other) {
+		delete begin_sent_;
+		begin_sent_ = new SNode();
+		end_sent_ = new SNode();
+		begin_sent_->next_.push_back(end_sent_);
+		begin_sent_->prev_.push_back(nullptr);
+		end_sent_->next_.push_back(nullptr);
+		end_sent_->prev_.push_back(begin_sent_);
+		copy_map(other);
+	  }
+	  return *this;
 	}
 	Map(std::initializer_list<std::pair<const Key_T, Mapped_T>>) {
 	  
@@ -397,6 +413,9 @@ namespace cs540 {
 	  Comparison
 	*/
 	friend bool operator==(const Map &first, const Map &second) {
+	  if (&first == &second) {
+		return true;
+	  }
 	  auto first_it = first.begin();
 	  auto second_it = second.begin();
 	  while (first_it != first.end() && second_it != second.end()) {
@@ -476,7 +495,22 @@ typename cs540::Map<Key_T, Mapped_T>::SNode *cs540::Map<Key_T, Mapped_T>::insert
 
 template <typename Key_T, typename Mapped_T>
 void cs540::Map<Key_T, Mapped_T>::copy_map(const Map<Key_T, Mapped_T> &other) {
-  
+  auto it = other.begin();
+  while (it != other.end()) {
+	insert(*it);
+	++ it;
+  }
+  // int current_level = other.begin_sent_->next_.size();
+  // while (begin_sent_->next_.size() < current_level + 1) {
+  // 	begin_sent_->next_.push_back(end_sent_);
+  // 	begin_sent_->prev_.push_back(nullptr);
+  // 	end_sent_->next_.push_back(nullptr);
+  // 	end_sent_->prev_.push_back(begin_sent_);
+  // }
+  // bool reached_end = false;
+  // while (!reached_end) {
+	
+  // }
 }
 
 #endif

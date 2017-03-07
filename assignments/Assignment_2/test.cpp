@@ -93,6 +93,7 @@ void assert_maps_const(const Map_One_T &my_map, const Map_Two_T &their_map) {
 
 void test_2(cs540::Map<int, int> &my_map, std::map<int, int> &their_map);
 void test_3();
+void test_4(cs540::Map<int, int> &my_map);
 void test_class_2(cs540::Map<MyClass, int> &my_map, std::map<MyClass, int> &their_map);
 
 template <typename Map_One_T, typename Map_Two_T>
@@ -278,6 +279,7 @@ void test_2(cs540::Map<int, int> &my_map, std::map<int, int> &their_map) {
   }
   assert_maps(my_map, their_map);
   test_3();
+  test_4(my_map);
 }
 
 void test_3() {
@@ -288,7 +290,7 @@ void test_3() {
   cs540::Map<int, int> my_second;
   std::map<int, int> their_first;
   std::map<int, int> their_second;
-  for (int i = 0; i < 50; ++ i) {
+  for (int i = 0; i < 5; ++ i) {
 	create_equal_maps(my_first, their_first, TEST_2_COUNT / 2);
 	create_equal_maps(my_second, their_second, TEST_2_COUNT / 2);
 	assert((my_first == my_second) == (their_first == their_second));
@@ -326,6 +328,24 @@ void test_3() {
 	my_first.clear();
 	my_second.clear();
   }
+}
+
+void test_4(cs540::Map<int, int> &my_map) {
+  /*
+	Test ctors
+   */
+  auto first_map = my_map;
+  assert(first_map == my_map);
+  auto second_map(my_map);
+  my_map = my_map;
+  assert(second_map == first_map);
+  assert(second_map == my_map);
+  assert(my_map == my_map);
+  /* 
+	 Check to make sure default constructed map followed by dtro
+	 doesn't lead to leaked memory
+   */
+  cs540::Map<int, int> map();
 }
 
 void test_class() {
