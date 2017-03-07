@@ -200,17 +200,17 @@ namespace cs540 {
 	  }
 	  ReverseIterator operator++(int) {
 		ReverseIterator it(*this);
-		node_ = node_->next_[0];
+		node_ = node_->prev_[0];
 		return it;
 	  }
 	  ReverseIterator &operator--() {
-		node_ = node_->next_[0];
-		return *this;		
+	  	node_ = node_->next_[0];
+	  	return *this;		
 	  }
 	  ReverseIterator operator--(int) {
-		ReverseIterator it(*this);
-		node_ = node_->prev_[0];
-		return it;		
+	  	ReverseIterator it(*this);
+	  	node_ = node_->next_[0];
+	  	return it;
 	  }
 	  ValueType &operator*() const {
 		return static_cast<Node *>(node_)->pair_val_;		
@@ -515,17 +515,6 @@ void cs540::Map<Key_T, Mapped_T>::copy_map(const Map<Key_T, Mapped_T> &other) {
 	insert(*it);
 	++ it;
   }
-  // int current_level = other.begin_sent_->next_.size();
-  // while (begin_sent_->next_.size() < current_level + 1) {
-  // 	begin_sent_->next_.push_back(end_sent_);
-  // 	begin_sent_->prev_.push_back(nullptr);
-  // 	end_sent_->next_.push_back(nullptr);
-  // 	end_sent_->prev_.push_back(begin_sent_);
-  // }
-  // bool reached_end = false;
-  // while (!reached_end) {
-	
-  // }
 }
 
 #endif

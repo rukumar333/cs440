@@ -43,11 +43,9 @@ class Foo {
   }
 };
 
-// template <typename Key_T, typename Mapped_T>
 template <typename Map_One_T, typename Map_Two_T>
 void assert_maps_const(const Map_One_T &my_map, const Map_Two_T &their_map);
 
-// template <typename Key_T, typename Mapped_T>
 template <typename Map_One_T, typename Map_Two_T>
 void assert_maps(Map_One_T &my_map, Map_Two_T &their_map) {
   /*
