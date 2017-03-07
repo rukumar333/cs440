@@ -341,6 +341,19 @@ void test_4(cs540::Map<int, int> &my_map) {
   assert(second_map == first_map);
   assert(second_map == my_map);
   assert(my_map == my_map);
+  cs540::Map<int, int> init_map{{1, 2}, {10, 5}, {-90, -10}};
+  auto init_it = init_map.begin();
+  assert(init_it->first == -90);
+  assert(init_it->second == -10);
+  ++ init_it;
+  assert(init_it->first == 1);
+  assert(init_it->second == 2);
+  ++ init_it;
+  assert(init_it->first == 10);
+  assert(init_it->second == 5);
+  ++ init_it;
+  assert(init_it == init_map.end());
+  assert(init_map.size() == 3);
   /* 
 	 Check to make sure default constructed map followed by dtro
 	 doesn't lead to leaked memory

@@ -244,7 +244,7 @@ namespace cs540 {
 	  begin_sent_->prev_.push_back(nullptr);
 	  end_sent_->next_.push_back(nullptr);
 	  end_sent_->prev_.push_back(begin_sent_);
-	  size_ = other.size_;
+	  size_ = 0;
 	  copy_map(other);
 	}
 	Map &operator=(const Map &other) {
@@ -256,12 +256,24 @@ namespace cs540 {
 		begin_sent_->prev_.push_back(nullptr);
 		end_sent_->next_.push_back(nullptr);
 		end_sent_->prev_.push_back(begin_sent_);
+		size_ = 0;
 		copy_map(other);
 	  }
 	  return *this;
 	}
-	Map(std::initializer_list<std::pair<const Key_T, Mapped_T>>) {
-	  
+	Map(std::initializer_list<std::pair<const Key_T, Mapped_T>> init_list) {
+	  size_ = 0;
+	  auto it = init_list.begin();
+	  begin_sent_ = new SNode();
+	  end_sent_ = new SNode();
+	  begin_sent_->next_.push_back(end_sent_);
+	  begin_sent_->prev_.push_back(nullptr);
+	  end_sent_->next_.push_back(nullptr);
+	  end_sent_->prev_.push_back(begin_sent_);
+	  while (it != init_list.end()) {
+		insert(*it);
+		++ it;
+	  }
 	}
 	~Map() {
 	  delete begin_sent_;
@@ -415,6 +427,9 @@ namespace cs540 {
 	friend bool operator==(const Map &first, const Map &second) {
 	  if (&first == &second) {
 		return true;
+	  }
+	  if (first.size_ != second.size_) {
+		return false;
 	  }
 	  auto first_it = first.begin();
 	  auto second_it = second.begin();
