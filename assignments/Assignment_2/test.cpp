@@ -25,6 +25,24 @@ class MyClass {
   friend bool operator==(const MyClass &a, const MyClass &b) { return a.data == b.data; }
 };
 
+class Foo {
+ private:
+  Foo();
+  Foo &operator=(const Foo &other);
+ public:
+  int data;
+  Foo(int a) { data = a; }
+  friend bool operator==(const Foo &a, const Foo &b) { return a.data == b.data; }
+  Foo &operator++() {
+	++ data;
+	return *this;
+  }
+  Foo operator++(int) {
+	++ data;
+	return *this;
+  }
+};
+
 // template <typename Key_T, typename Mapped_T>
 template <typename Map_One_T, typename Map_Two_T>
 void assert_maps_const(const Map_One_T &my_map, const Map_Two_T &their_map);
@@ -94,7 +112,11 @@ void assert_maps_const(const Map_One_T &my_map, const Map_Two_T &their_map) {
 void test_2(cs540::Map<int, int> &my_map, std::map<int, int> &their_map);
 void test_3();
 void test_4(cs540::Map<int, int> &my_map);
+void test_5(cs540::Map<int, int> &my_map);
 void test_class_2(cs540::Map<MyClass, int> &my_map, std::map<MyClass, int> &their_map);
+void test_class_3();
+void test_class_4(cs540::Map<MyClass, int> &my_map);
+void test_class_5(cs540::Map<MyClass, int> &my_map);
 
 template <typename Map_One_T, typename Map_Two_T>
 void create_equal_maps(Map_One_T &my_map, Map_Two_T &their_map, int num_elements) {
@@ -131,6 +153,21 @@ void myclass_create_equal_maps(Map_One_T &my_map, Map_Two_T &their_map, int num_
   assert(their_map.empty());
   for (int i = 0; i < num_elements; ++ i) {
 	std::pair<MyClass, int> to_insert(MyClass(dist_(gen_)), dist_(gen_));
+	auto my_it = my_map.insert(to_insert);
+	auto their_it = their_map.insert(to_insert);
+	assert(my_it.second == their_it.second);
+  }
+  assert(!my_map.empty());
+  assert(!their_map.empty());
+  assert_maps(my_map, their_map);
+}
+
+template <typename Map_One_T, typename Map_Two_T>
+void foo_create_equal_maps(Map_One_T &my_map, Map_Two_T &their_map, int num_elements) {
+  assert(my_map.empty());
+  assert(their_map.empty());
+  for (int i = 0; i < num_elements; ++ i) {
+	std::pair<MyClass, Foo> to_insert(MyClass(dist_(gen_)), Foo(dist_(gen_)));
 	auto my_it = my_map.insert(to_insert);
 	auto their_it = their_map.insert(to_insert);
 	assert(my_it.second == their_it.second);
@@ -359,15 +396,49 @@ void test_4(cs540::Map<int, int> &my_map) {
 	 doesn't lead to leaked memory
    */
   cs540::Map<int, int> map();
+  test_5(my_map);
+}
+
+void test_5(cs540::Map<int, int> &my_map) {
+  auto &other_map = my_map;
+  auto my_it = my_map.begin();
+  auto other_it = other_map.begin();
+  while (my_it != my_map.end()) {
+	assert(my_it == other_it);
+	++ other_it;
+	++ my_it;
+  }
+  assert(my_it == other_it);
+  cs540::Map<int, int>::ConstIterator my_it_const = my_map.begin();
+  cs540::Map<int, int>::ConstIterator other_it_const = other_map.begin();
+  my_it = my_map.begin();
+  while (my_it_const != my_map.end()) {
+	assert(my_it_const == other_it_const);
+	assert(my_it == other_it_const);
+	++ other_it_const;
+	++ my_it_const;
+	++ my_it;
+  }
+  auto diff_map(my_map);
+  assert(my_map.begin() != diff_map.begin());
+  assert(my_map.rbegin() != diff_map.rbegin());
+  assert(my_it_const == other_it_const);
+  auto r_my_it = my_map.rbegin();
+  auto r_other_it = other_map.rbegin();
+  while (r_my_it != my_map.rend()) {
+	assert(r_my_it == r_other_it);
+	++ r_my_it;
+	++ r_other_it;
+  }
 }
 
 void test_class() {
   /*
 	Test element access
    */
-  cs540::Map<MyClass, int> my_map;
-  std::map<MyClass, int> their_map;
-  myclass_create_equal_maps(my_map, their_map, TEST_2_COUNT);
+  cs540::Map<MyClass, Foo> my_map;
+  std::map<MyClass, Foo> their_map;
+  foo_create_equal_maps(my_map, their_map, TEST_2_COUNT);
   for (int i = 0; i < TEST_2_COUNT; ++ i) {
   	MyClass key(dist_(gen_));
   	auto my_it = my_map.find(key);
@@ -375,27 +446,27 @@ void test_class() {
   	assert((my_it == my_map.end()) == (their_it == their_map.end()));
   	if (my_it != my_map.end()) {
   	  assert(my_it->second == their_it->second);
-	  int &my_int = my_map.at(key);
-	  int &their_int = their_map.at(key);
+	  Foo &my_int = my_map.at(key);
+	  Foo &their_int = their_map.at(key);
 	  assert(my_int == their_int);
 	  ++ my_int;
-	  assert(my_map.at(key) == their_map.at(key) + 1);
+	  assert(my_map.at(key).data == their_map.at(key).data + 1);
 	  ++ their_int;
 	  assert(my_map.at(key) == their_map.at(key));
 	  assert(my_map[key] == their_map[key]);
   	} else {
 	  try {
-		int x = my_map.at(key);
+		Foo x = my_map.at(key);
 		/*
 		  Code should never get here
 		 */
 		++ x;
 		assert(false);
 	  } catch (const std::out_of_range &e) {
-		my_map[key] = 63;
-		assert(my_map[key] == 63);
+		my_map[key] = Foo(63);
+		assert(my_map[key] == Foo(63));
 		assert(my_map.size() == their_map.size() + 1);
-		their_map[key] = 63;
+		their_map[key] = Foo(63);
 	  } catch (...) {
 		/*
 		  Should be throwing out_of_range exception
