@@ -39,17 +39,8 @@ int main () {
         
         m.erase(iter);
     }
-	m.write_to_file();
-	// using TimePoint = std::chrono::time_point<std::chrono::system_clock>;
-    // using Milli = std::chrono::duration<double, std::ratio<1,1000>>;
-    // using namespace std::chrono;
-
-    // TimePoint start, end;
-    // start = system_clock::now();
-	// m.insert({100000, 100000});
     end = system_clock::now();
     Milli elapsed = end - start;
-	std::cout << elapsed.count() << std::endl;
     assert(elapsed.count() < 2500);
 
     return 0;
