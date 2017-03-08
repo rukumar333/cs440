@@ -24,4 +24,4 @@ gdb: test
 	gdb -x gdb_commands.txt ./test.exe
 
 clean:
-	rm *.o *.exe
+	rm *.o *.exe *.data

@@ -5,10 +5,10 @@
 #include <cassert>
 #include "Map.hpp"
 
-#define UPPER_LIMIT 500
-#define LOWER_LIMIT -500
+#define UPPER_LIMIT 100000
+#define LOWER_LIMIT 0
 
-#define TEST_2_COUNT 1000
+#define TEST_2_COUNT 100000
 
 std::random_device rand_dev_;
 std::mt19937_64 gen_(rand_dev_());

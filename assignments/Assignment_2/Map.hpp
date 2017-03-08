@@ -49,11 +49,12 @@ namespace cs540 {
 	/*
 	  Private methods for Map
 	 */	
-	size_t get_number_levels(double rand_dbl) {
+	size_t get_number_levels() {
 	  size_t levels = 0;
+	  double rand_dbl = dist_(gen_);
 	  while (rand_dbl < 0.5) {
-		++ levels;
-		rand_dbl = rand_dbl * 2;
+	  	++ levels;
+	  	rand_dbl = rand_dbl * 2;
 	  }
 	  return levels;
 	}
@@ -364,8 +365,8 @@ namespace cs540 {
 	  Modifier
 	 */
 	std::pair<Iterator, bool> insert(const ValueType &value) {
-	  double rand_dbl = dist_(gen_);
-	  size_t num_levels = get_number_levels(rand_dbl);
+	  // double rand_dbl = dist_(gen_);
+	  size_t num_levels = get_number_levels();
 	  Node *element = new Node(value.first, value.second, num_levels);
 	  // If current size of begin_sent_ and end_Sent_ is smaller than num_levels
 	  while (begin_sent_->next_.size() < num_levels + 1) {
@@ -378,9 +379,9 @@ namespace cs540 {
 	  size_t min_index = std::min((size_t)begin_sent_->next_.size() - 1, num_levels);
 	  SNode *ptr = insert_node(element, min_index);
 	  if (ptr == element) {
-		return std::make_pair(Iterator(ptr), true);
+		return {Iterator(ptr), true};
 	  } else {
-		return std::make_pair(Iterator(ptr), false);	  
+		return {Iterator(ptr), false};
 	  }
 	}
 
@@ -396,10 +397,10 @@ namespace cs540 {
 	  }
 	  size_t min_index = std::min((size_t)begin_sent_->next_.size() - 1, num_levels);
 	  if (!insert_node(element, min_index)) {
-		return std::make_pair(Iterator((Node *)nullptr), false);
+		return {Iterator((Node *)nullptr), false};
 	  }
 	  ++ size_;
-	  return std::make_pair(Iterator(element), true);
+	  return {Iterator(element), true};
 	}
 	
 	template <typename IT_T>
@@ -501,8 +502,7 @@ typename cs540::Map<Key_T, Mapped_T>::SNode *cs540::Map<Key_T, Mapped_T>::insert
 	if (current_element == end_sent_) {
 	  need_to_insert = true;
 	} else {
-	  if (element->pair_val_.first ==
-		  static_cast<Node *>(current_element)->pair_val_.first) {
+	  if (element->pair_val_.first == static_cast<Node *>(current_element)->pair_val_.first) {
 		erase(Iterator(element));
 		return current_element;
 	  }
