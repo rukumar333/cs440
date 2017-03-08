@@ -21,13 +21,12 @@ bool operator<(const TimKey &lhs, const TimKey &rhs) {
 
 struct TimValue {
   char data;
-  TimValue() {
-	data = 0;
-  }
-  TimValue(char c) {
+  TimValue(char c){
 	data = c;
   }
-  // TimValue() = delete;
+  TimValue(){
+	data = 0;
+  }  
 };
 bool operator==(const TimValue &lhs, const TimValue &rhs) {
   return lhs.data == rhs.data;

@@ -20,8 +20,8 @@ stress_test: stress_test.o
 stress_test.o: stress_test.cpp Map.hpp
 	$(CC) $(CFLAGS) -c stress_test.cpp
 
-gdb: test
-	gdb -x gdb_commands.txt ./test.exe
+gdb: stress_test
+	gdb -x gdb_commands.txt ./stress_test.exe
 
 clean:
 	rm *.o *.exe *.data

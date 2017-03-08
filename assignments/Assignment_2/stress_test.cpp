@@ -12,7 +12,7 @@
 int main () {
     auto seed = std::chrono::system_clock::now().time_since_epoch().count();
     std::default_random_engine gen(seed);
-    std::uniform_int_distribution<unsigned int> dist(0, 100000);
+    std::uniform_int_distribution<unsigned int> dist(0, 10000);
     
     cs540::Map<int, int> m;
 
@@ -23,7 +23,7 @@ int main () {
     TimePoint start, end;
     start = system_clock::now();
     
-    for(int i = 0; i < 100000; ++i) {
+    for(int i = 0; i < 1000000; ++i) {
         auto g = dist(gen);
         m.insert({g, g});
     }
@@ -39,7 +39,14 @@ int main () {
         
         m.erase(iter);
     }
+	m.write_to_file();
+	// using TimePoint = std::chrono::time_point<std::chrono::system_clock>;
+    // using Milli = std::chrono::duration<double, std::ratio<1,1000>>;
+    // using namespace std::chrono;
 
+    // TimePoint start, end;
+    // start = system_clock::now();
+	// m.insert({100000, 100000});
     end = system_clock::now();
     Milli elapsed = end - start;
 	std::cout << elapsed.count() << std::endl;

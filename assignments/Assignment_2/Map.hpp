@@ -9,6 +9,7 @@
 #include <random>
 #include <algorithm>
 #include <stdexcept>
+#include <fstream>
 
 #ifndef CS440_MAP_HPP_
 #define CS440_MAP_HPP_
@@ -24,10 +25,12 @@ namespace cs540 {
    private:
 	class SNode {
 	 public:
+	  // SNode *next_;
+	  // SNode *prev_;
 	  std::vector<SNode *> next_;
 	  std::vector<SNode *> prev_;
 	  SNode(size_t num_levels)
-			: next_(num_levels + 1, nullptr), prev_(num_levels + 1, nullptr) { }
+	  		: next_(num_levels + 1, nullptr), prev_(num_levels + 1, nullptr) { }
 	  SNode() { }
 	  ~SNode() {
 		if (next_.size() != 0 && next_[0] != nullptr) {
@@ -51,10 +54,10 @@ namespace cs540 {
 	 */	
 	size_t get_number_levels() {
 	  size_t levels = 0;
-	  double rand_dbl = dist_(gen_);
-	  while (rand_dbl < 0.5) {
-	  	++ levels;
-	  	rand_dbl = rand_dbl * 2;
+	  for (; levels <= 100000; ++ levels) {
+	  	if (!(rand() % 2)) {
+	  	  return levels;
+	  	}
 	  }
 	  return levels;
 	}
@@ -102,20 +105,56 @@ namespace cs540 {
 	  }
 	}
 
+	void print_ken_map() {
+	  SNode *it = begin_sent_;
+	  std::cout << "Beginning sentinel" << " ";
+	  for (unsigned int i = 0; i < it->next_.size(); ++ i) {
+		std::cout << it->next_[i] << " ";
+	  }
+	  std::cout << std::endl;
+	  it = it->next_[0];	  
+	  while (it != end_sent_) {
+		std::cout << static_cast<Node *>(it)->pair_val_.first << " ";
+		for (unsigned int i = 0; i < it->next_.size(); ++ i) {
+		  std::cout << it->next_[i] << " ";
+		}
+		std::cout << std::endl;
+		it = it->next_[0];
+	  }
+	}
+
 	void copy_map(const Map &other);
 	/*
 	  Private Data Members
 	 */
 	size_t size_;
-	std::random_device rand_dev_;
-	std::mt19937_64 gen_;
-	std::uniform_real_distribution<double> dist_;
+	// std::random_device rand_dev_;
+	// std::mt19937_64 gen_;
+	// std::uniform_real_distribution<double> dist_;
 	SNode *begin_sent_;
 	SNode *end_sent_;
    public:
 	typedef std::pair<const Key_T, Mapped_T> ValueType;
 	void print() {
 	  print_map();
+	}
+
+	void print_ken() {
+	  print_ken_map();
+	}
+
+	void write_to_file() {
+	  std::ofstream file("output.txt");
+	  for (int i = begin_sent_->next_.size() - 1; i >=0 ; -- i) {
+		file << "Level: " << i << "\n";
+		SNode *head = begin_sent_->next_[i];
+		while (head != end_sent_) {
+		  file << static_cast<Node *>(head)->pair_val_.first << " ";
+		  head = head->next_[i];
+		}
+		file << "\n";
+	  }
+	  file.close();
 	}
 
 	class Iterator : public ConstIterator{
@@ -250,7 +289,8 @@ namespace cs540 {
 	/*
 	  Ctors, assignment, dtor
 	*/
-	Map() :  gen_(rand_dev_()), dist_(0.0, 1.0) {
+	Map() {
+	  // Map() :  gen_(rand_dev_()), dist_(0.0, 1.0) {
 	  size_ = 0;
 	  begin_sent_ = new SNode();
 	  end_sent_ = new SNode();
@@ -259,7 +299,8 @@ namespace cs540 {
 	  end_sent_->next_.push_back(nullptr);
 	  end_sent_->prev_.push_back(begin_sent_);
 	}
-	Map(const Map &other) : gen_(rand_dev_()), dist_(0.0, 1.0) {
+	Map(const Map &other) {
+	// Map(const Map &other) : gen_(rand_dev_()), dist_(0.0, 1.0) {
 	  begin_sent_ = new SNode();
 	  end_sent_ = new SNode();
 	  begin_sent_->next_.push_back(end_sent_);
@@ -376,8 +417,8 @@ namespace cs540 {
 		end_sent_->next_.push_back(nullptr);
 	  }
 	  ++ size_;
-	  size_t min_index = std::min((size_t)begin_sent_->next_.size() - 1, num_levels);
-	  SNode *ptr = insert_node(element, min_index);
+	  // size_t min_index = std::min((size_t)begin_sent_->next_.size() - 1, num_levels);
+	  SNode *ptr = insert_node(element, num_levels);
 	  if (ptr == element) {
 		return {Iterator(ptr), true};
 	  } else {
@@ -386,7 +427,7 @@ namespace cs540 {
 	}
 
 	std::pair<Iterator, bool> insert(const ValueType &value, size_t num_levels) {
-	  std::cout << num_levels << std::endl;
+	  // std::cout << num_levels << std::endl;
 	  Node *element = new Node(value.first, value.second, num_levels);
 	  // If current size of begin_sent_ and end_Sent_ is smaller than num_levels
 	  while (begin_sent_->next_.size() < num_levels + 1) {
@@ -395,8 +436,8 @@ namespace cs540 {
 		begin_sent_->prev_.push_back(nullptr);
 		end_sent_->next_.push_back(nullptr);
 	  }
-	  size_t min_index = std::min((size_t)begin_sent_->next_.size() - 1, num_levels);
-	  if (!insert_node(element, min_index)) {
+	  // size_t min_index = std::min((size_t)begin_sent_->next_.size() - 1, num_levels);
+	  if (!insert_node(element, num_levels)) {
 		return {Iterator((Node *)nullptr), false};
 	  }
 	  ++ size_;
@@ -494,7 +535,10 @@ namespace cs540 {
 template <typename Key_T, typename Mapped_T>
 typename cs540::Map<Key_T, Mapped_T>::SNode *cs540::Map<Key_T, Mapped_T>::insert_node(
     cs540::Map<Key_T, Mapped_T>::Node *element,
-	size_t current_level) {
+	size_t num_levels) {
+  // std::cout << element->pair_val_.first << std::endl;
+  // std::cout << element->pair_val_.second << std::endl;
+  size_t current_level = begin_sent_->next_.size() - 1;
   auto current_element = begin_sent_->next_[current_level];
   bool need_to_insert = false;
   bool reached_end = false;
@@ -513,6 +557,7 @@ typename cs540::Map<Key_T, Mapped_T>::SNode *cs540::Map<Key_T, Mapped_T>::insert
 	  }
 	}
 	if (need_to_insert) {
+	  if (current_level <= num_levels) {
 		element->next_[current_level] = current_element;
 		element->prev_[current_level] = current_element->prev_[current_level];
 		current_element->prev_[current_level]->next_[current_level] = element;
@@ -523,6 +568,14 @@ typename cs540::Map<Key_T, Mapped_T>::SNode *cs540::Map<Key_T, Mapped_T>::insert
 		} else {
 		  reached_end = true;
 		}
+	  } else {
+		if (current_level != 0) {
+		  current_element = current_element->prev_[current_level]->next_[current_level - 1];
+		  -- current_level;
+		} else {
+		  reached_end = true;
+		}
+	  }
 	}
 	need_to_insert = false;
   }
