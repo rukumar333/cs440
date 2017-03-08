@@ -128,6 +128,27 @@ namespace cs540 {
 	  	this->node_ = other_node;
 	  }
 	 public:
+	  // Iterator(const Iterator &other) {
+	  // 	this->node_ = other.node_;
+	  // }
+	  Iterator &operator++() {
+	  	this->node_ = this->node_->next_[0];
+	  	return *this;
+	  }
+	  Iterator operator++(int) {
+	  	Iterator it(*this);
+	  	this->node_ = this->node_->next_[0];
+	  	return it;
+	  }
+	  Iterator &operator--() {
+	  	this->node_ = this->node_->prev_[0];
+	  	return *this;		
+	  }
+	  Iterator operator--(int) {
+	  	Iterator it(*this);
+	  	this->node_ = this->node_->prev_[0];
+	  	return it;
+	  }
 	  ValueType &operator*() const {
 		return static_cast<Node *>(this->node_)->pair_val_;
 	  }
@@ -148,7 +169,7 @@ namespace cs540 {
 	  	node_ = other_node;
 	  }
 	 public:
-	  ConstIterator(const Iterator &other) {
+	  ConstIterator(const ConstIterator &other) {
 	  	this->node_ = other.node_;
 	  }
 	  ConstIterator &operator++() {
@@ -167,7 +188,7 @@ namespace cs540 {
 	  ConstIterator operator--(int) {
 	  	ConstIterator it(*this);
 	  	node_ = node_->prev_[0];
-	  	return it;		
+	  	return it;
 	  }
 	  const ValueType &operator*() const {
 		return static_cast<Node *>(node_)->pair_val_;
