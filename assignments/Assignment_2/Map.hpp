@@ -32,11 +32,11 @@ namespace cs540 {
 	  SNode(size_t num_levels)
 	  		: next_(num_levels + 1, nullptr), prev_(num_levels + 1, nullptr) { }
 	  SNode() { }
-	  ~SNode() {
-		if (next_.size() != 0 && next_[0] != nullptr) {
-		  delete next_[0];
-		}
-	  }
+	  // ~SNode() {
+	  // 	if (next_.size() != 0 && next_[0] != nullptr) {
+	  // 	  delete next_[0];
+	  // 	}
+	  // }
 	};
 	
 	/*
@@ -91,6 +91,16 @@ namespace cs540 {
 		}
 	  }
 	  return end_sent_;
+	}
+
+	void delete_nodes() {
+	  SNode *it = begin_sent_;
+	  SNode *temp;
+	  while (it != nullptr) {
+		temp = it;
+		it = it->next_[0];
+		delete temp;
+	  }
 	}
 	
 	void print_map() {
@@ -312,7 +322,8 @@ namespace cs540 {
 	}
 	Map &operator=(const Map &other) {
 	  if (this != &other) {
-		delete begin_sent_;
+		// delete begin_sent_;
+		delete_nodes();
 		begin_sent_ = new SNode();
 		end_sent_ = new SNode();
 		begin_sent_->next_.push_back(end_sent_);
@@ -339,7 +350,8 @@ namespace cs540 {
 	  }
 	}
 	~Map() {
-	  delete begin_sent_;
+	  // delete begin_sent_;
+	  delete_nodes();
 	}
 	/*
 	  Size
@@ -475,7 +487,8 @@ namespace cs540 {
 	  }
 	}
 	void clear() {
-	  delete begin_sent_;
+	  // delete begin_sent_;
+	  delete_nodes();
 	  begin_sent_ = new SNode();
 	  end_sent_ = new SNode();
 	  begin_sent_->next_.push_back(end_sent_);
