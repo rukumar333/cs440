@@ -25,18 +25,11 @@ namespace cs540 {
    private:
 	class SNode {
 	 public:
-	  // SNode *next_;
-	  // SNode *prev_;
 	  std::vector<SNode *> next_;
 	  std::vector<SNode *> prev_;
 	  SNode(size_t num_levels)
 	  		: next_(num_levels + 1, nullptr), prev_(num_levels + 1, nullptr) { }
 	  SNode() { }
-	  // ~SNode() {
-	  // 	if (next_.size() != 0 && next_[0] != nullptr) {
-	  // 	  delete next_[0];
-	  // 	}
-	  // }
 	};
 	
 	/*
@@ -138,34 +131,10 @@ namespace cs540 {
 	  Private Data Members
 	 */
 	size_t size_;
-	// std::random_device rand_dev_;
-	// std::mt19937_64 gen_;
-	// std::uniform_real_distribution<double> dist_;
 	SNode *begin_sent_;
 	SNode *end_sent_;
    public:
 	typedef std::pair<const Key_T, Mapped_T> ValueType;
-	void print() {
-	  print_map();
-	}
-
-	void print_ken() {
-	  print_ken_map();
-	}
-
-	void write_to_file() {
-	  std::ofstream file("output.txt");
-	  for (int i = begin_sent_->next_.size() - 1; i >=0 ; -- i) {
-		file << "Level: " << i << "\n";
-		SNode *head = begin_sent_->next_[i];
-		while (head != end_sent_) {
-		  file << static_cast<Node *>(head)->pair_val_.first << " ";
-		  head = head->next_[i];
-		}
-		file << "\n";
-	  }
-	  file.close();
-	}
 
 	class Iterator : public ConstIterator{
 	  friend class Map;
@@ -178,9 +147,6 @@ namespace cs540 {
 	  	this->node_ = other_node;
 	  }
 	 public:
-	  // Iterator(const Iterator &other) {
-	  // 	this->node_ = other.node_;
-	  // }
 	  Iterator &operator++() {
 	  	this->node_ = this->node_->next_[0];
 	  	return *this;
@@ -300,7 +266,6 @@ namespace cs540 {
 	  Ctors, assignment, dtor
 	*/
 	Map() {
-	  // Map() :  gen_(rand_dev_()), dist_(0.0, 1.0) {
 	  size_ = 0;
 	  begin_sent_ = new SNode();
 	  end_sent_ = new SNode();
@@ -310,7 +275,6 @@ namespace cs540 {
 	  end_sent_->prev_.push_back(begin_sent_);
 	}
 	Map(const Map &other) {
-	// Map(const Map &other) : gen_(rand_dev_()), dist_(0.0, 1.0) {
 	  begin_sent_ = new SNode();
 	  end_sent_ = new SNode();
 	  begin_sent_->next_.push_back(end_sent_);
@@ -322,7 +286,6 @@ namespace cs540 {
 	}
 	Map &operator=(const Map &other) {
 	  if (this != &other) {
-		// delete begin_sent_;
 		delete_nodes();
 		begin_sent_ = new SNode();
 		end_sent_ = new SNode();
@@ -350,7 +313,6 @@ namespace cs540 {
 	  }
 	}
 	~Map() {
-	  // delete begin_sent_;
 	  delete_nodes();
 	}
 	/*
@@ -418,7 +380,6 @@ namespace cs540 {
 	  Modifier
 	 */
 	std::pair<Iterator, bool> insert(const ValueType &value) {
-	  // double rand_dbl = dist_(gen_);
 	  size_t num_levels = get_number_levels();
 	  Node *element = new Node(value.first, value.second, num_levels);
 	  // If current size of begin_sent_ and end_Sent_ is smaller than num_levels
@@ -429,7 +390,6 @@ namespace cs540 {
 		end_sent_->next_.push_back(nullptr);
 	  }
 	  ++ size_;
-	  // size_t min_index = std::min((size_t)begin_sent_->next_.size() - 1, num_levels);
 	  SNode *ptr = insert_node(element, num_levels);
 	  if (ptr == element) {
 		return {Iterator(ptr), true};
@@ -439,7 +399,6 @@ namespace cs540 {
 	}
 
 	std::pair<Iterator, bool> insert(const ValueType &value, size_t num_levels) {
-	  // std::cout << num_levels << std::endl;
 	  Node *element = new Node(value.first, value.second, num_levels);
 	  // If current size of begin_sent_ and end_Sent_ is smaller than num_levels
 	  while (begin_sent_->next_.size() < num_levels + 1) {
@@ -448,7 +407,6 @@ namespace cs540 {
 		begin_sent_->prev_.push_back(nullptr);
 		end_sent_->next_.push_back(nullptr);
 	  }
-	  // size_t min_index = std::min((size_t)begin_sent_->next_.size() - 1, num_levels);
 	  if (!insert_node(element, num_levels)) {
 		return {Iterator((Node *)nullptr), false};
 	  }
@@ -487,7 +445,6 @@ namespace cs540 {
 	  }
 	}
 	void clear() {
-	  // delete begin_sent_;
 	  delete_nodes();
 	  begin_sent_ = new SNode();
 	  end_sent_ = new SNode();
@@ -510,7 +467,6 @@ namespace cs540 {
 	  auto first_it = first.begin();
 	  auto second_it = second.begin();
 	  while (first_it != first.end() && second_it != second.end()) {
-		// if (first_it->first != second_it->first || first_it->second != second_it->second) {
 		if (*first_it != *second_it) {
 		  return false;
 		}
@@ -549,8 +505,6 @@ template <typename Key_T, typename Mapped_T>
 typename cs540::Map<Key_T, Mapped_T>::SNode *cs540::Map<Key_T, Mapped_T>::insert_node(
     cs540::Map<Key_T, Mapped_T>::Node *element,
 	size_t num_levels) {
-  // std::cout << element->pair_val_.first << std::endl;
-  // std::cout << element->pair_val_.second << std::endl;
   size_t current_level = begin_sent_->next_.size() - 1;
   auto current_element = begin_sent_->next_[current_level];
   bool need_to_insert = false;
