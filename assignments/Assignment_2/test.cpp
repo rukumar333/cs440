@@ -20,7 +20,12 @@ class MyClass {
   MyClass &operator=(const MyClass &other);
  public:
   int data;
-  MyClass(int a) { data = a; }
+  MyClass(int a) {
+	data = a;
+  }
+  MyClass(const MyClass &other) {
+	this->data = other.data;
+  }
   friend bool operator<(const MyClass &a, const MyClass &b) { return a.data < b.data; }
   friend bool operator==(const MyClass &a, const MyClass &b) { return a.data == b.data; }
 };
@@ -683,4 +688,3 @@ int main() {
   test_class();
   test_1();
 }
-

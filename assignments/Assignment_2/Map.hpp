@@ -1,15 +1,10 @@
-#include <cassert>
 #include <cstdlib>
 #include <iostream>
 #include <string>
 #include <utility>
 #include <initializer_list>
 #include <vector>
-#include <array>
-#include <random>
-#include <algorithm>
 #include <stdexcept>
-#include <fstream>
 
 #ifndef CS440_MAP_HPP_
 #define CS440_MAP_HPP_
@@ -397,27 +392,11 @@ namespace cs540 {
 		return {Iterator(ptr), false};
 	  }
 	}
-
-	std::pair<Iterator, bool> insert(const ValueType &value, size_t num_levels) {
-	  Node *element = new Node(value.first, value.second, num_levels);
-	  // If current size of begin_sent_ and end_Sent_ is smaller than num_levels
-	  while (begin_sent_->next_.size() < num_levels + 1) {
-		begin_sent_->next_.push_back(end_sent_);
-		end_sent_->prev_.push_back(begin_sent_);
-		begin_sent_->prev_.push_back(nullptr);
-		end_sent_->next_.push_back(nullptr);
-	  }
-	  if (!insert_node(element, num_levels)) {
-		return {Iterator((Node *)nullptr), false};
-	  }
-	  ++ size_;
-	  return {Iterator(element), true};
-	}
 	
 	template <typename IT_T>
 	void insert(IT_T range_beg, IT_T range_end) {
 	  while (range_beg != range_end) {
-		insert(ValueType(*range_beg));
+		insert(*range_beg);
 		++ range_beg;
 	  }
 	}
