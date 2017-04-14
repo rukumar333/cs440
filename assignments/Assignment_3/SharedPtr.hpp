@@ -10,15 +10,6 @@ namespace cs540 {
 	class Node {
 	 public:
 	  int reference_count_;
-	  // void inc() {
-	  // 	++ reference_count_;
-	  // }
-	  // void dec() {
-	  // 	-- reference_count_;
-	  // }
-	  // bool is_zero() {
-	  // 	return reference_count_ == 0;
-	  // }
 	  virtual ~Node() {}
 	};
 
@@ -129,21 +120,34 @@ namespace cs540 {
 	  Modifiers
 	 */
 	void reset() {
-	  
+	  dec();
+	  control_ptr_ = nullptr;
+	  ptr_ = nullptr;
 	}
 	template <typename U>
-	void reset(U *p);
+	void reset(U *p) {
+	  dec();
+	  control_ptr_ = new NodeDerived<U>(p);
+	  ptr_ = p;
+	}
 	/*
 	  Observers
 	 */
-	T *get() const;
-	T &operator*() const;
-	T *operator->() const;
-	explicit operator bool() const;
+	T *get() const {
+	  return ptr_;
+	}
+	T &operator*() const {
+	  return *ptr_;
+	}
+	T *operator->() const {
+	  return ptr_;
+	}
+	explicit operator bool() const {
+	  return ptr_ != nullptr;
+	}
 	/*
 	  Free functions
 	 */
-	
   };
   
 }
