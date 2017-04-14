@@ -40,9 +40,9 @@ namespace cs540 {
 		data_ = nullptr;
 	  }
 	};
+	
 	Node *control_ptr_;
     T *ptr_;
-	
    public:
 	/*
 	  Ctors, dtors, assignment
@@ -70,10 +70,63 @@ namespace cs540 {
 	  p.control_ptr_ = nullptr;	  
 	}
 	SharedPtr &operator=(const SharedPtr &p) {
-	  
+	  if (this != &p) {
+		if (control_ptr_ != nullptr) {
+		  control_ptr_->dec();
+		  if (control_ptr_->is_zero()) {
+			delete control_ptr_;
+		  }
+		}
+		ptr_ = p.ptr_;
+		control_ptr_ = p.control_ptr_;
+		if (control_ptr_ != nullptr)
+		  control_ptr_->inc();
+	  }
 	}
 	template <typename U>	
-	SharedPtr &operator=(const SharedPtr<U> &p);
+	SharedPtr &operator=(const SharedPtr<U> &p) {
+	  if (this != &p) {
+		if (control_ptr_ != nullptr) {
+		  control_ptr_->dec();
+		  if (control_ptr_->is_zero()) {
+			delete control_ptr_;
+		  }
+		}
+		ptr_ = p.ptr_;
+		control_ptr_ = p.control_ptr_;
+		if (control_ptr_ != nullptr)
+		  control_ptr_->inc();
+	  }
+	}
+	SharedPtr &operator=(const SharedPtr &&p) {
+	  if (this != &p) {
+		if (control_ptr_ != nullptr) {
+		  control_ptr_->dec();
+		  if (control_ptr_->is_zero()) {
+			delete control_ptr_;
+		  }
+		}
+		ptr_ = p.ptr_;
+		control_ptr_ = p.control_ptr_;
+		p.ptr = nullptr;
+		p.control_ptr_ = nullptr;
+	  }
+	}
+	template <typename U>	
+	SharedPtr &operator=(const SharedPtr<U> &&p) {
+	  if (this != &p) {
+		if (control_ptr_ != nullptr) {
+		  control_ptr_->dec();
+		  if (control_ptr_->is_zero()) {
+			delete control_ptr_;
+		  }
+		}
+		ptr_ = p.ptr_;
+		control_ptr_ = p.control_ptr_;
+		p.ptr = nullptr;
+		p.control_ptr_ = nullptr;
+	  }
+	}
 	~SharedPtr() {
 	  if (control_ptr_ != nullptr) {
 		assert(!control_ptr_->is_zero());
@@ -88,7 +141,8 @@ namespace cs540 {
 	/*
 	  Modifiers
 	 */
-	void reset();
+	void reset() {
+	}
 	template <typename U>
 	void reset(U *p);
 	/*
