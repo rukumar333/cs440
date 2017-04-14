@@ -23,26 +23,24 @@ class Derived : public Base {
 	str = new char[10];
   }
   ~Derived() {
-	if (str != nullptr) {
+	// if (str != nullptr) {
 	  delete[] str;
-	  str = nullptr;
-	}
+	  // str = nullptr;
+	// }
   }
 };
 
 int main() {
-  // Base *b = new Base();
+  Base *b = new Base();
   Derived *d = new Derived();
-  // Base *b_2 = new Base();
   Derived *d_2 = new Derived();
-  std::cout << std::hex << &(d->~Derived())
-  // cs540::SharedPtr<Base> b_ptr{b};
-  // cs540::SharedPtr<Base> b_ptr2{d};
-  // cs540::SharedPtr<Derived> d_ptr2_2{d_2};
+  cs540::SharedPtr<Base> b_ptr{b};
+  cs540::SharedPtr<Base> b_ptr2{d};
+  cs540::SharedPtr<Derived> d_ptr2_2{d_2};
   // std::shared_ptr<Base> b_their_ptr{b};
   // std::shared_ptr<Base> b_their_ptr2{d};
   // std::shared_ptr<Derived> d_their_ptr2_2{d_2};
-  delete d;
-  delete d_2;
+  // delete d;
+  // delete d_2;
   return 0;
 }

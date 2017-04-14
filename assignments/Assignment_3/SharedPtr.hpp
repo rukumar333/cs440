@@ -1,15 +1,14 @@
 #include <cassert>
-#include <functional>
+#include <mutex>
 
 namespace cs540 {
 
   template <typename T>
   class SharedPtr {
    private:
-	class Node{
+
+	class Node {
 	 public:
-	  T *data_;
-	  std::function<void(T &)> deleter_;
 	  int reference_count_;
 	  void inc() {
 		++ reference_count_;
@@ -20,18 +19,25 @@ namespace cs540 {
 	  bool is_zero() {
 		return reference_count_ == 0;
 	  }
-	  
-	  Node(T *input_) : deleter_(){
+	  virtual ~Node() {}
+	};
+
+	template <typename U>
+	class NodeDerived : public Node {
+	 public:
+	  U *data_;
+	  using Node::reference_count_;
+	  NodeDerived(U *input_) {
 		reference_count_ = 1;
 		data_ = input_;
 	  }
-	  Node() {
+	  NodeDerived() {
 		data_ = nullptr;
 		reference_count_ = 0;
 	  }
-	  ~Node() {
-		deleter_(&data_);
-		// delete data_;
+	  ~NodeDerived() {
+		delete data_;
+		data_ = nullptr;
 	  }
 	};
 	Node *ptr_;
@@ -41,11 +47,11 @@ namespace cs540 {
 	  Ctors, dtors, assignment
 	 */
 	SharedPtr() {
-	  ptr_ = new Node();
+	  ptr_ = nullptr;
 	}
 	template <typename U>
 	explicit SharedPtr(U *data) {
-	  ptr_ = new Node(data);
+	  ptr_ = new NodeDerived<U>(data);
 	}
 	SharedPtr(const SharedPtr &p);
 	template <typename U>
