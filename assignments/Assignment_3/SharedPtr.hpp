@@ -40,34 +40,48 @@ namespace cs540 {
 		data_ = nullptr;
 	  }
 	};
-	Node *ptr_;
-
+	Node *control_ptr_;
+    T *ptr_;
+	
    public:
 	/*
 	  Ctors, dtors, assignment
 	 */
-	SharedPtr() {
-	  ptr_ = nullptr;
+	SharedPtr() : ptr_{nullptr}, control_ptr_{nullptr} { }
+	template <typename U>
+	explicit SharedPtr(U *data) : control_ptr_{new NodeDerived<U>(data)}, ptr_{data} {}
+	SharedPtr(const SharedPtr &p) : ptr_{p.ptr_}, control_ptr_{p.control_ptr_} {
+	  if (ptr_ != nullptr) 
+		control_ptr_->inc();
 	}
 	template <typename U>
-	explicit SharedPtr(U *data) {
-	  ptr_ = new NodeDerived<U>(data);
+	SharedPtr(const SharedPtr<U> &p) : ptr_{p.ptr_}, control_ptr_{p.control_ptr_} {
+	  if (ptr_ != nullptr) {
+		control_ptr_->inc();		
+	  }
 	}
-	SharedPtr(const SharedPtr &p);
+	SharedPtr(const SharedPtr &&p) : ptr_{p.ptr_}, control_ptr_{p.control_ptr_} {
+	  p.ptr_ = nullptr;
+	  p.control_ptr_ = nullptr;
+	}
 	template <typename U>
-	SharedPtr(const SharedPtr<U> &p);
-	SharedPtr(const SharedPtr &&p);
-	template <typename U>
-	SharedPtr(const SharedPtr<U> &&p);
-	SharedPtr &operator=(const SharedPtr &p);
+	SharedPtr(const SharedPtr<U> &&p) : ptr_{p.ptr_}, control_ptr_{p.control_ptr_} {
+	  p.ptr_ = nullptr;
+	  p.control_ptr_ = nullptr;	  
+	}
+	SharedPtr &operator=(const SharedPtr &p) {
+	  
+	}
 	template <typename U>	
 	SharedPtr &operator=(const SharedPtr<U> &p);
 	~SharedPtr() {
-	  if (ptr_ != nullptr) {
-		assert(!ptr_->is_zero());
-		ptr_->dec();
-		if (ptr_->is_zero()) {
-		  delete ptr_;
+	  if (control_ptr_ != nullptr) {
+		assert(!control_ptr_->is_zero());
+		control_ptr_->dec();
+		if (control_ptr_->is_zero()) {
+		  delete control_ptr_;
+		  control_ptr_ = nullptr;
+		  ptr_ = nullptr;
 		}
 	  }
 	}

@@ -30,6 +30,8 @@ class Derived : public Base {
   }
 };
 
+void should_not_compile();
+
 int main() {
   Base *b = new Base();
   Derived *d = new Derived();
@@ -43,4 +45,11 @@ int main() {
   // delete d;
   // delete d_2;
   return 0;
+}
+
+void should_not_compile() {
+  // Base *b = new Base();
+  // cs540::SharedPtr<Derived> ptr{b};
+  // Base *b_their = new Base();
+  // std::shared_ptr<Derived> ptr_their{b_their};
 }
