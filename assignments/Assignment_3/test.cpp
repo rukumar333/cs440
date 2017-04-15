@@ -33,12 +33,12 @@ class Derived : public Base {
 void should_not_compile();
 
 int main() {
-  Base *b = new Base();
-  Derived *d = new Derived();
-  Derived *d_2 = new Derived();
-  cs540::SharedPtr<Base> b_ptr{b};
-  cs540::SharedPtr<Base> b_ptr2{d};
-  cs540::SharedPtr<Derived> d_ptr2_2{d_2};
+  // Base *b = new Base();
+  // Derived *d = new Derived();
+  // Derived *d_2 = new Derived();
+  cs540::SharedPtr<Base> b_ptr(new Base);
+  cs540::SharedPtr<Base> b_ptr2(new Derived);
+  cs540::SharedPtr<Derived> d_ptr2_2(new Derived);
   std::cout << (b_ptr == d_ptr2_2) << std::endl;
   std::cout << (b_ptr == nullptr) << std::endl;
   // std::shared_ptr<Base> b_their_ptr{b};
