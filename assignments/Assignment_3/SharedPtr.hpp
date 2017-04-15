@@ -145,9 +145,40 @@ namespace cs540 {
 	explicit operator bool() const {
 	  return ptr_ != nullptr;
 	}
-	/*
-	  Free functions
-	 */
   };
-  
+  /*
+	Free functions
+  */
+  template <typename T1, typename T2>
+  bool operator==(const SharedPtr<T1> &p1, const SharedPtr<T2> &p2) {
+	return p1.get() == p2.get();
+  }
+  template <typename T>
+  bool operator==(const SharedPtr<T> &p1, std::nullptr_t) {
+	return !p1;
+  }
+  template <typename T>
+  bool operator==(std::nullptr_t, const SharedPtr<T> &p1) {
+	return !p1;
+  }
+  template <typename T1, typename T2>
+  bool operator!=(const SharedPtr<T1> &p1, const SharedPtr<T2> &p2) {
+	return p1.get() != p2.get();
+  }
+  template <typename T>
+  bool operator!=(const SharedPtr<T> &p1, std::nullptr_t) {
+	return p1;
+  }
+  template <typename T>
+  bool operator!=(std::nullptr_t, const SharedPtr<T> &p1) {
+	return p1;
+  }
+  template <typename T, typename U>
+  SharedPtr<T> static_pointer_cast(const SharedPtr<U> &sp) {
+	return SharedPtr<T>()
+  }
+  template <typename T, typename U>
+  SharedPtr<T> dynamic_pointer_cast(const SharedPtr<U> &sp) {
+	
+  }
 }

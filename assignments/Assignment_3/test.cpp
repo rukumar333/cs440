@@ -39,6 +39,8 @@ int main() {
   cs540::SharedPtr<Base> b_ptr{b};
   cs540::SharedPtr<Base> b_ptr2{d};
   cs540::SharedPtr<Derived> d_ptr2_2{d_2};
+  std::cout << (b_ptr == d_ptr2_2) << std::endl;
+  std::cout << (b_ptr == nullptr) << std::endl;
   // std::shared_ptr<Base> b_their_ptr{b};
   // std::shared_ptr<Base> b_their_ptr2{d};
   // std::shared_ptr<Derived> d_their_ptr2_2{d_2};
