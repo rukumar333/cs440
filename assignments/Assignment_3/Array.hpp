@@ -32,8 +32,8 @@ namespace cs540 {
 	size_t size_;
    public:
 	Array() {
-	  data_ = new MyInt[INITIAL_CAPACITY];
-	  capacity_ = INITIAL_CAPACITY;
+	  data_ = nullptr;
+	  capacity_ = 0;
 	  size_ = 0;
 	}
 
@@ -66,7 +66,8 @@ namespace cs540 {
 
 	Array& operator=(const Array& other) {
 	  if (this != &other) {
-		delete[] data_;
+		if (data_)
+		  delete[] data_;
 		capacity_ = other.capacity_;
 		size_ = other.size_;
 		data_ = new MyInt[capacity_];
@@ -77,7 +78,8 @@ namespace cs540 {
 
 	Array& operator=(Array &&other) {
 	  if (this != &other) {
-		delete[] data_;
+		if (data_)
+		  delete[] data_;
 		capacity_  = std::move(other.capacity_);
 		size_ = std::move(other.size_);
 		data_ = std::move(other.data_);
