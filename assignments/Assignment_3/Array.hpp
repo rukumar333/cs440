@@ -118,27 +118,27 @@ namespace cs540 {
 	  for (unsigned int i = 0; i < TEST_CAPACITY; ++ i) {
 		*(a1.data_ + i) = i;
 	  }
-	  std::cout << "Testing with Array of size " << TEST_CAPACITY << std::endl;
+	  std::cerr << "Testing with Array of size " << TEST_CAPACITY << std::endl;
 	  start = system_clock::now();
 	  Array a2{a1};
 	  end = system_clock::now();
 	  Milli elapsed = end - start;
-	  std::cout << "Milliseconds for copy constructor: " << elapsed.count() << std::endl;
+	  std::cerr << "Milliseconds for copy constructor: " << elapsed.count() << std::endl;
 	  start = system_clock::now();
 	  Array a3{std::move(a1)};
 	  end = system_clock::now();
 	  elapsed = end - start;
-	  std::cout << "Milliseconds for move constructor: " << elapsed.count() << std::endl;
+	  std::cerr << "Milliseconds for move constructor: " << elapsed.count() << std::endl;
 	  start = system_clock::now();
 	  a1 = a2;
 	  end = system_clock::now();
 	  elapsed = end - start;
-	  std::cout << "Milliseconds for copy assignment: " << elapsed.count() << std::endl;
+	  std::cerr << "Milliseconds for copy assignment: " << elapsed.count() << std::endl;
 	  start = system_clock::now();
 	  a3 = std::move(a2);
 	  end = system_clock::now();
 	  elapsed = end - start;
-	  std::cout << "Milliseconds for move assignment: " << elapsed.count() << std::endl;	  
+	  std::cerr << "Milliseconds for move assignment: " << elapsed.count() << std::endl;	  
 	}
   };
 }
