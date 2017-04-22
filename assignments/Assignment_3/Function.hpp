@@ -14,15 +14,18 @@ namespace cs540 {
 	  virtual ResultType operator()(ArgumentTypes... arguments) = 0;
 	  virtual ~CallBase() {}
 	  virtual explicit operator bool() const = 0;
+	  virtual CallBase *clone() = 0;
 	};
 
 	template <typename FunctionType>
 	class CallDerived {
 	 public:
 	  CallDerived(FunctionType f) : function_(f) { }
+	  CallDerived *clone() {
+		return new CallDerived(function_);
+	  }
 	  ResultType operator()(ArgumentTypes... arguments) {
 		return function_(std::forward(arguments)...);
-		// return function_(arguments);
 		// return std::invoke(function_, std::forward<ArgumentTypes>(arguments)...);
 	  }
 	  virtual explicit operator bool() const {
@@ -43,14 +46,20 @@ namespace cs540 {
 	}
 
 	Function(const Function &other) {
-	  
+	  if (other.call_ref)
+		call_ref = other.call_ref->clone();
+	  else
+		call_ref = nullptr;
 	}
 
 	Function &operator=(const Function &other) {
 	  if (call_ref != nullptr) {
 		delete call_ref;
 	  }
-	  
+	  if (other.call_ref)
+		call_ref = other.call_ref->clone();
+	  else
+		call_ref = nullptr;
 	}
 
 	~Function() {
@@ -64,7 +73,10 @@ namespace cs540 {
 	}
 
 	explicit operator bool() const {
-	  return *call_ref;
+	  if (call_ref)
+		return *call_ref;
+	  else
+		return false;
 	}
   };
 }
