@@ -1,10 +1,17 @@
 #include <functional>
 #include <type_traits>
+#include <exception>
 
 #ifndef FUNCTION_CS440
 #define FUNCTION_CS440
 
 namespace cs540 {
+  class BadFunctionCall : public std::exception {
+	virtual const char* what() const throw() {
+	  return "Bad function call";
+	}
+  };
+  
   template <typename> class Function;
   template <typename ResultType, typename... ArgumentTypes>
   class Function<ResultType(ArgumentTypes...)> {
@@ -25,7 +32,7 @@ namespace cs540 {
 		return new CallDerived(function_);
 	  }
 	  ResultType operator()(ArgumentTypes... arguments) {
-		return function_(std::forward(arguments)...);
+		return function_(std::forward<ArgumentTypes>(arguments)...);
 		// return std::invoke(function_, std::forward<ArgumentTypes>(arguments)...);
 	  }
 	  // virtual explicit operator bool() const {
@@ -60,6 +67,7 @@ namespace cs540 {
 		call_ref = other.call_ref->clone();
 	  else
 		call_ref = nullptr;
+	  return *this;
 	}
 
 	~Function() {
@@ -69,7 +77,10 @@ namespace cs540 {
 	}
 
 	ResultType operator()(ArgumentTypes... arguments) {
-	  *(call_ref)(std::forward(arguments...));
+	  if (call_ref)
+		return (*(call_ref))(std::forward<ArgumentTypes>(arguments)...);
+	  else
+		throw BadFunctionCall();
 	}
 
 	explicit operator bool() const {
@@ -88,11 +99,11 @@ namespace cs540 {
 	}
 
 	friend bool operator!=(const Function &f, std::nullptr_t) {
-	  return f;
+	  return bool(f);
 	}
 
 	friend bool operator!=(std::nullptr_t, const Function &f) {
-	  return f;
+	  return bool(f);
 	}
   };
 }
