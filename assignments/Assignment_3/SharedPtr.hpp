@@ -2,6 +2,9 @@
 #include <iostream>
 #include <mutex>
 
+#ifndef SHARED_PTR_CS440
+#define SHARED_PTR_CS440
+
 namespace cs540 {
   std::mutex mutex_;
   /**
@@ -203,3 +206,5 @@ namespace cs540 {
 	return SharedPtr<T>(dynamic_cast<T *>(sp.get()), sp);
   }
 }
+
+#endif
