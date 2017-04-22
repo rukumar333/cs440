@@ -13,12 +13,12 @@ namespace cs540 {
 	 public:
 	  virtual ResultType operator()(ArgumentTypes... arguments) = 0;
 	  virtual ~CallBase() {}
-	  virtual explicit operator bool() const = 0;
+	  // virtual explicit operator bool() const = 0;
 	  virtual CallBase *clone() = 0;
 	};
 
 	template <typename FunctionType>
-	class CallDerived {
+	class CallDerived : public CallBase {
 	 public:
 	  CallDerived(FunctionType f) : function_(f) { }
 	  CallDerived *clone() {
@@ -28,10 +28,10 @@ namespace cs540 {
 		return function_(std::forward(arguments)...);
 		// return std::invoke(function_, std::forward<ArgumentTypes>(arguments)...);
 	  }
-	  virtual explicit operator bool() const {
-		// return (bool)(struct is_invocable<(FunctionType(ArgumentTypes...)>(function_));
-		return true;
-	  };
+	  // virtual explicit operator bool() const {
+	  // 	return std::is_invocable<FunctionType, Arg
+	  // 	// return (bool)(struct is_invocable<(FunctionType(ArgumentTypes...)>(function_));
+	  // };
 	  FunctionType function_;
 	};
 	CallBase *call_ref;
@@ -74,9 +74,25 @@ namespace cs540 {
 
 	explicit operator bool() const {
 	  if (call_ref)
-		return *call_ref;
+		return true;
 	  else
 		return false;
+	}
+
+	friend bool operator==(const Function &f, std::nullptr_t) {
+	  return !f;
+	}
+
+	friend bool operator==(std::nullptr_t, const Function &f) {
+	  return !f;
+	}
+
+	friend bool operator!=(const Function &f, std::nullptr_t) {
+	  return f;
+	}
+
+	friend bool operator!=(std::nullptr_t, const Function &f) {
+	  return f;
 	}
   };
 }
