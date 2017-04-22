@@ -20,7 +20,6 @@ namespace cs540 {
 	 public:
 	  virtual ResultType operator()(ArgumentTypes... arguments) = 0;
 	  virtual ~CallBase() {}
-	  // virtual explicit operator bool() const = 0;
 	  virtual CallBase *clone() = 0;
 	};
 
@@ -33,12 +32,7 @@ namespace cs540 {
 	  }
 	  ResultType operator()(ArgumentTypes... arguments) {
 		return function_(std::forward<ArgumentTypes>(arguments)...);
-		// return std::invoke(function_, std::forward<ArgumentTypes>(arguments)...);
 	  }
-	  // virtual explicit operator bool() const {
-	  // 	return std::is_invocable<FunctionType, Arg
-	  // 	// return (bool)(struct is_invocable<(FunctionType(ArgumentTypes...)>(function_));
-	  // };
 	  FunctionType function_;
 	};
 	CallBase *call_ref;
