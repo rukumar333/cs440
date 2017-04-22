@@ -4,11 +4,12 @@
 #include <initializer_list>
 #include <utility>
 #include <iostream>
+#include <chrono>
 
 #ifndef ARRAY_CS440
 #define ARRAY_CS440
 
-#define INITIAL_CAPACITY 256
+#define TEST_CAPACITY 100000
 
 namespace cs540 {
   class Array {
@@ -104,6 +105,40 @@ namespace cs540 {
 	  }
 	  os << *(array.data_ + i);
 	  return os;
+	}
+
+	static void move_performance_test() {
+	  using TimePoint = std::chrono::time_point<std::chrono::system_clock>;
+	  using Milli = std::chrono::duration<double, std::ratio<1,1000>>;
+	  using namespace std::chrono;
+	  TimePoint start, end;
+	  Array a1;
+	  a1.data_ = new MyInt[TEST_CAPACITY];
+	  a1.capacity_ = TEST_CAPACITY;
+	  for (unsigned int i = 0; i < TEST_CAPACITY; ++ i) {
+		*(a1.data_ + i) = i;
+	  }
+	  std::cout << "Testing with Array of size " << TEST_CAPACITY << std::endl;
+	  start = system_clock::now();
+	  Array a2{a1};
+	  end = system_clock::now();
+	  Milli elapsed = end - start;
+	  std::cout << "Milliseconds for copy constructor: " << elapsed.count() << std::endl;
+	  start = system_clock::now();
+	  Array a3{std::move(a1)};
+	  end = system_clock::now();
+	  elapsed = end - start;
+	  std::cout << "Milliseconds for move constructor: " << elapsed.count() << std::endl;
+	  start = system_clock::now();
+	  a1 = a2;
+	  end = system_clock::now();
+	  elapsed = end - start;
+	  std::cout << "Milliseconds for copy assignment: " << elapsed.count() << std::endl;
+	  start = system_clock::now();
+	  a3 = std::move(a2);
+	  end = system_clock::now();
+	  elapsed = end - start;
+	  std::cout << "Milliseconds for move assignment: " << elapsed.count() << std::endl;	  
 	}
   };
 }
