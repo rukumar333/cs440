@@ -1,8 +1,8 @@
 CC = g++
-CFLAGS = -g -std=c++14 -Wall -Wextra -pedantic
+CFLAGS = -g -std=c++17 -Wall -Wextra -pedantic
 LDFLAGS = -g
 
-all: test SharedPtr_test Array_test
+all: test SharedPtr_test Array_test Function_test
 
 test: test.o
 	$(CC) $(LDFLAGS) test.o -o test.exe
@@ -21,6 +21,12 @@ Array_test: Array_test.o MyInt.o
 
 Array_test.o: Array_test.cpp Array.hpp
 	$(CC) $(CFLAGS) -c Array_test.cpp
+
+Function_test: Function_test.o
+	$(CC) $(LDFLAGS) Function_test.o -o Function_test.exe
+
+Function_test.o: Function_test.cpp Function.hpp
+	$(CC) $(CFLAGS) -c Function_test.cpp
 
 MyInt.o: MyInt.cpp
 	$(CC) $(CFLAGS) -c MyInt.cpp
