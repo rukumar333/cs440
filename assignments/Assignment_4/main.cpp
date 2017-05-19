@@ -11,4 +11,5 @@ int main() {
   std::cout << *it << std::endl;
   ++ it;
   std::cout << *it << std::endl;
+  cs540::Array<long, 2, 3> array_s(array);
 }

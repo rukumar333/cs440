@@ -210,7 +210,7 @@ namespace cs540 {
 	}
 	
 	template <typename U>
-	Array(const Array<U, Dims...> &other) {
+	Array(const Array<U, DIM_T, Dims...> &other) {
 	  static_assert(DIM_T != 0);
 	  for(size_t i = 0; i < DIM_T; ++ i) {
 		array[i] = other.array[i];
@@ -225,10 +225,11 @@ namespace cs540 {
 	}
 
 	template <typename U>
-	Array &operator=(const Array<U, Dims...> &other) {
+	Array &operator=(const Array<U, DIM_T, Dims...> &other) {
 	  for(size_t i = 0; i < DIM_T; ++ i) {
 		array[i] = other.array[i];
 	  }
+	  return *this;
 	}
 	
 	Array<T, Dims...> &operator[](size_t index) {
@@ -427,6 +428,7 @@ namespace cs540 {
 	  for(size_t i = 0; i < DIM_T; ++ i) {
 		array[i] = other.array[i];
 	  }
+	  return *this;
 	}
 	
 	T &operator[](size_t index) {
