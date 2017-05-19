@@ -49,7 +49,7 @@ namespace cs540 {
 		if (!end) {
 		  next_iterator = outer_ptr->array[index].fmbegin(); 
 		} else {
-		  next_iterator = outer_ptr->array[index].fmend();
+		  next_iterator = outer_ptr->array[index - 1].fmend();
 		}
 	  }
 	  
@@ -86,34 +86,51 @@ namespace cs540 {
 	  }
 	  
 	  FirstDimensionMajorIterator &operator++() {
-		if (next_iterator.at_end != true) {
-		  ++ next_iterator;
-		} else {
-		  if (at_end != true) {
-			++ index;
-			if (index == DIM_T) {
-			  at_end = true;
-			} else {
-			  next_iterator = outer_ptr->array[index].fmbegin();
+		if (at_end != true) {
+		  if (next_iterator.at_end != true) {
+			++ next_iterator;
+			if (next_iterator.at_end == true) {
+			  ++ index;
+			  if (index == DIM_T) {
+				at_end = true;
+			  } else {
+				next_iterator = outer_ptr->array[index].fmbegin();				
+			  }
 			}
-		  }
+		  }  
 		}
+		// if (next_iterator.at_end != true) {
+		//   ++ next_iterator;
+		//   if (next_iterator.at_end == true) {
+		// 	++ index;
+		//   }
+		// } else {
+		//   if (at_end != true) {
+		// 	++ index;
+		// 	if (index == DIM_T) {
+		// 	  at_end = true;
+		// 	} else {
+ 		// 	  next_iterator = outer_ptr->array[index].fmbegin();
+		// 	}
+		//   }
+		// }
 		return *this;
 	  }
 	  
 	  FirstDimensionMajorIterator operator++(int) {
 		auto it = *this;
-		if (next_iterator.at_end != true) {
-		  ++ next_iterator;
-		} else {
-		  if (at_end != true) {
-			++ index;
-			if (index == DIM_T) {
-			  at_end = true;
-			} else {
-			  next_iterator = outer_ptr->array[index].fmbegin();
+		if (at_end != true) {
+		  if (next_iterator.at_end != true) {
+			++ next_iterator;
+			if (next_iterator.at_end == true) {
+			  ++ index;
+			  if (index == DIM_T) {
+				at_end = true;
+			  } else {
+				next_iterator = outer_ptr->array[index].fmbegin();				
+			  }
 			}
-		  }
+		  }  
 		}
 		return it;	
 	  }

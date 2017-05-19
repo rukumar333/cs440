@@ -2,7 +2,7 @@ CC = g++
 CFLAGS = -g -std=c++17 -Wall -Wextra -pedantic
 LDFLAGS = -g
 
-all: main
+all: main test_Array
 
 main: main.o Array.hpp
 	$(CC) $(LDFLAGS) main.o -o main.exe
