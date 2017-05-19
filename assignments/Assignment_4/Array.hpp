@@ -239,6 +239,13 @@ namespace cs540 {
 	  return array[index];
 	}
 
+	const Array<T, Dims...> &operator[](size_t index) const {
+	  if (index < 0 || index >= DIM_T) {
+		throw OutOfRange("Index out of range!\n");
+	  }
+	  return array[index];
+	}
+
 	FMIterator fmbegin() {
 	  return FMIterator(*this);
 	}
@@ -247,11 +254,11 @@ namespace cs540 {
 	  return FMIterator(*this);
 	}
 
-	FMIterator lmbegin() {
+	LMIterator lmbegin() {
 	  return LMIterator(*this);
 	}
 
-	FMIterator lmend() {
+	LMIterator lmend() {
 	  return FMIterator(*this);
 	}
   };
@@ -373,9 +380,10 @@ namespace cs540 {
 
 	  LastDimensionMajorIterator &operator++() {
 		if (at_end != true) {
-		  -- index;
-		  if (index == -1) {
+		  if (index == 0) {
 			at_end = true;
+		  } else {
+			-- index;	
 		  }
 		}
 		return *this;
@@ -384,9 +392,10 @@ namespace cs540 {
 	  LastDimensionMajorIterator operator++(int) {
 		auto it = *this;
 		if (at_end != true) {
-		  -- index;
-		  if (index == -1) {
+		  if (index == 0) {
 			at_end = true;
+		  } else {
+			-- index;	
 		  }
 		}
 		return it;
@@ -437,6 +446,13 @@ namespace cs540 {
 	  }
 	  return array[index];
 	}
+
+	const T &operator[](size_t index) const {
+	  if (index < 0 || index >= DIM_T) {
+		throw OutOfRange("Index out of range!\n");
+	  }
+	  return array[index];
+	}
 	
 	FMIterator fmbegin() {
 	  return FMIterator(*this);
@@ -446,11 +462,11 @@ namespace cs540 {
 	  return FMIterator(*this);
 	}
 		
-	FMIterator lmbegin() {
+	LMIterator lmbegin() {
 	  return LMIterator(*this);
 	}
 
-	FMIterator lmend() {
+	LMIterator lmend() {
 	  return LMIterator(*this);
 	}
   };
