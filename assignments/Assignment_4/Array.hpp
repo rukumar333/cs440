@@ -32,16 +32,25 @@ namespace cs540 {
 	 private:
 	  typedef typename NextArray::FirstDimensionMajorIterator NextIterator;
 	  friend class Array<T, DIM_T, Dims...>;
-	  size_t index;
 	  NextIterator next_iterator;
 	  Array<T, DIM_T, Dims...> *outer_ptr;
 	 public:
 	  bool at_end;
-	  FirstDimensionMajorIterator(Array<T, DIM_T, Dims...> &outer_class) {
-		at_end = false;
-		index = 0;
+	  size_t index;
+	  FirstDimensionMajorIterator(Array<T, DIM_T, Dims...> &outer_class, bool end) {
 		outer_ptr = &outer_class;
-		next_iterator = outer_ptr->array[index].fmbegin();
+		if (!end) {
+		  at_end = false;
+		  index = 0;
+		} else {
+		  at_end = true;
+		  index = DIM_T;
+		}
+		if (!end) {
+		  next_iterator = outer_ptr->array[index].fmbegin(); 
+		} else {
+		  next_iterator = outer_ptr->array[index].fmend();
+		}
 	  }
 	  
 	  FirstDimensionMajorIterator() {
@@ -122,11 +131,19 @@ namespace cs540 {
 	  Array<T, DIM_T, Dims...> *outer_ptr;
 	 public:
 	  bool at_end;
-	  LastDimensionMajorIterator(Array<T, DIM_T, Dims...> &outer_class) {
-		at_end = false;
-		index = DIM_T - 1;
+	  LastDimensionMajorIterator(Array<T, DIM_T, Dims...> &outer_class, bool end) {
+		if (!end) {
+		  at_end = false;
+		  index = DIM_T - 1;		  
+		} else {
+		  at_end = true;
+		  index = 0;
+		}
 		outer_ptr = &outer_class;
-		next_iterator = outer_ptr->array[index].lmbegin();
+		if (!end)
+		  next_iterator = outer_ptr->array[index].lmbegin();
+		else
+		  next_iterator = outer_ptr->array[index].lmend();
 	  }
 	  
 	  LastDimensionMajorIterator() {
@@ -247,19 +264,20 @@ namespace cs540 {
 	}
 
 	FMIterator fmbegin() {
-	  return FMIterator(*this);
+	  return FMIterator(*this, false);
 	}
 
 	FMIterator fmend() {
-	  return FMIterator(*this);
+	  return FMIterator(*this, true);
+	  
 	}
 
 	LMIterator lmbegin() {
-	  return LMIterator(*this);
+	  return LMIterator(*this, false);
 	}
 
 	LMIterator lmend() {
-	  return FMIterator(*this);
+	  return FMIterator(*this, true);
 	}
   };
 
@@ -279,9 +297,14 @@ namespace cs540 {
 	  size_t index;
 	 public:
 	  bool at_end;
-	  FirstDimensionMajorIterator(Array<T, DIM_T> &outer_class) {
-		at_end = false;
-		index = 0;
+	  FirstDimensionMajorIterator(Array<T, DIM_T> &outer_class, bool end) {
+		if (!end) {
+		  at_end = false;
+		  index = 0;
+		} else {
+		  at_end = true;
+		  index = DIM_T;
+		}
 		outer_ptr = &outer_class;
 	  }
 	  
@@ -345,9 +368,14 @@ namespace cs540 {
 	  size_t index;
 	 public:
 	  bool at_end;
-	  LastDimensionMajorIterator(Array<T, DIM_T> &outer_class) {
-		at_end = false;
-		index = DIM_T - 1;
+	  LastDimensionMajorIterator(Array<T, DIM_T> &outer_class, bool end) {
+		if (!end) {
+		  at_end = false;
+		  index = DIM_T - 1;		  
+		} else {
+		  at_end = true;
+		  index = 0;
+		}
 		outer_ptr = &outer_class;
 	  }
 	  
@@ -455,19 +483,19 @@ namespace cs540 {
 	}
 	
 	FMIterator fmbegin() {
-	  return FMIterator(*this);
+	  return FMIterator(*this, false);
 	}
 
 	FMIterator fmend() {
-	  return FMIterator(*this);
+	  return FMIterator(*this, true);
 	}
 		
 	LMIterator lmbegin() {
-	  return LMIterator(*this);
+	  return LMIterator(*this, false);
 	}
 
 	LMIterator lmend() {
-	  return LMIterator(*this);
+	  return LMIterator(*this, true);
 	}
   };
 }
