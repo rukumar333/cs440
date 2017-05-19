@@ -10,11 +10,11 @@ main: main.o Array.hpp
 main.o: main.cpp Array.hpp
 	$(CC) $(CFLAGS) -c main.cpp
 
-main: main.o Array.hpp
-	$(CC) $(LDFLAGS) main.o -o main.exe
+test_Array: test_Array.o Array.hpp
+	$(CC) $(LDFLAGS) test_Array.o -o test_Array.exe
 
-main.o: main.cpp Array.hpp
-	$(CC) $(CFLAGS) -c main.cpp
+test_Array.o: test_Array.cpp Array.hpp
+	$(CC) $(CFLAGS) -c test_Array.cpp
 
 clean:
 	rm *.o *.exe
