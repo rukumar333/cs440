@@ -228,6 +228,7 @@ namespace cs540 {
 		  index = index % DIM_T;
 		  if (next_iterators[index].at_end == true) {
 			at_end = true;
+			index = DIM_T;
 		  }
 		}
 		return *this;
@@ -551,7 +552,7 @@ namespace cs540 {
 	// };
 	
 	Array() {
-	  static_assert(DIM_T != 0);	  
+	  static_assert(DIM_T != 0);
 	}
 	
 	Array(const Array &other) {

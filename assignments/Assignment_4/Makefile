@@ -2,7 +2,7 @@ CC = g++
 CFLAGS = -g -std=c++17 -Wall -Wextra -pedantic
 LDFLAGS = -g
 
-all: main test_Array
+all: main test_Array smaller_test
 
 main: main.o Array.hpp
 	$(CC) $(LDFLAGS) main.o -o main.exe
@@ -15,6 +15,12 @@ test_Array: test_Array.o Array.hpp
 
 test_Array.o: test_Array.cpp Array.hpp
 	$(CC) $(CFLAGS) -c test_Array.cpp
+
+smaller_test: smaller_test.o Array.hpp
+	$(CC) $(LDFLAGS) smaller_test.o -o smaller_test.exe
+
+smaller_test.o: smaller_test.cpp Array.hpp
+	$(CC) $(CFLAGS) -c smaller_test.cpp
 
 clean:
 	rm *.o *.exe
