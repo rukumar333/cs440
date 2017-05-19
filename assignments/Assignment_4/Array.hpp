@@ -7,21 +7,34 @@
 namespace cs540 {
   template <typename T, size_t... Dims>
   class Array {
-   private:
 	
-	// template <size_t DIM_T, std::tuple<size_t>
-	// class ArrayRecursive {
+   private:
+	// class ArrayRecursiveBase {
 	//  public:
-	//   ArrayRecursive<Dims_Inner...> array;
-	  
+	//   virtual ~ArrayRecursiveBase() {};
 	// };
 
-	// template <size_t FIRST_DIM_T>
-	// class ArrayRecursive {
-	//  public:
-	//   // T array[DIM_T];
+	template <size_t ...DIM_T> class ArrayRecursive;
+	
+	template <size_t DIM_T, size_t... Dims_Inner>
+	class ArrayRecursive<DIM_T, Dims_Inner...> {
+	 public:
+	  ArrayRecursive<Dims_Inner...> array[DIM_T];
+	  ArrayRecursive<Dims_Inner...> &operator[](size_t index) {
+		return array[index];
+	  }
+	};
+
+	template <size_t DIM_T>
+	class ArrayRecursive<DIM_T> {
+	 public:
+	  // ArrayRecursive<Dims_Inner...> array[DIM_T];
+	  T array[DIM_T];
+	  T &operator[](size_t index) {
+		return array[index];
+	  }
 	  
-	// };
+	};
 	
    public:
 	typedef T ValueType;
@@ -41,6 +54,9 @@ namespace cs540 {
 	template <typename U>
 	Array &operator=(const Array<U, Dims...> &other);
 	
+	ArrayRecursive<Dims...> &operator[](size_t index) {
+	  return array[index];
+	}
   };
 }
 
