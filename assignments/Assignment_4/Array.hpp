@@ -2,6 +2,7 @@
 #include <tuple>
 #include <type_traits>
 #include <stdexcept>
+#include <cstring>
 
 #ifndef ARRAY_CS_440
 #define ARRAY_CS_440
@@ -27,231 +28,239 @@ namespace cs540 {
 	class LastDimensionMajorIterator;
 	typedef FirstDimensionMajorIterator FMIterator;
 	typedef LastDimensionMajorIterator LMIterator;
-	
+
 	class FirstDimensionMajorIterator {
-	 private:
-	  typedef typename NextArray::FirstDimensionMajorIterator NextIterator;
-	  friend class Array<T, DIM_T, Dims...>;
-	  NextIterator next_iterator;
-	  Array<T, DIM_T, Dims...> *outer_ptr;
+     #define num_dims sizeof...(Dims) + 1
 	 public:
-	  bool at_end;
-	  size_t index;
-	  FirstDimensionMajorIterator(Array<T, DIM_T, Dims...> &outer_class, bool end) {
-		outer_ptr = &outer_class;
-		if (!end) {
-		  at_end = false;
-		  index = 0;
-		} else {
-		  at_end = true;
-		  index = DIM_T;
-		}
-		if (!end) {
-		  next_iterator = outer_ptr->array[index].fmbegin(); 
-		} else {
-		  next_iterator = outer_ptr->array[index - 1].fmend();
-		}
-	  }
+	  size_t indices[num_dims];
+	  size_t max_dimensions[num_dims];
+	  bool end;
+	  Array<T, DIM_T, Dims...> *outer_ptr;
 	  
 	  FirstDimensionMajorIterator() {
-		at_end = false;
-		index = 0;
+		fill_max_dimensions(0, DIM_T, Dims...);
+		for (unsigned int i = 0; i < num_dims; ++ i) {
+		  indices[i] = 0;
+		}
 		outer_ptr = nullptr;
+		end = false;
 	  }
-	  
+
+	  FirstDimensionMajorIterator(Array<T, DIM_T, Dims...> &outer, bool begin) {
+		fill_max_dimensions(0, DIM_T, Dims...);
+		if (begin) {
+		  for (unsigned int i = 0; i < num_dims; ++ i) {
+			indices[i] = 0;
+		  }
+		  end = false;
+		} else {
+		  end = true;
+		  for (unsigned int i = 0; i < num_dims; ++ i) {
+			indices[i] = 0;
+		  }
+		}
+		outer_ptr = &outer;
+	  }
+
 	  FirstDimensionMajorIterator(const FMIterator &other) {
-		at_end = other.at_end;
-		next_iterator = other.next_iterator;
-		index = other.index;
+		std::memcpy(indices, other.indices, sizeof(size_t) * num_dims);
+		std::memcpy(max_dimensions, max_dimensions, sizeof(size_t) * num_dims);
 		outer_ptr = other.outer_ptr;
+		end = other.end;
 	  }
-	  
+
 	  FirstDimensionMajorIterator &operator=(const FMIterator &other) {
 		if (this == &other)
 		  return *this;
-		at_end = other.at_end;
-		next_iterator = other.next_iterator;
-		index = other.index;
+		std::memcpy(indices, other.indices, sizeof(size_t) * num_dims);
+		std::memcpy(max_dimensions, max_dimensions, sizeof(size_t) * num_dims);
 		outer_ptr = other.outer_ptr;
+		end = other.end;
 		return *this;
 	  }
 
 	  friend bool operator==(const FMIterator &first, const FMIterator &second) {
-		return (first.index == second.index) && (first.outer_ptr == second.outer_ptr)
-		  && (first.next_iterator == second.next_iterator);
+		if (!first.end && !second.end){
+		  bool result = false;
+		  result = first.outer_ptr == second.outer_ptr;
+		  for(unsigned int i = 0; i < num_dims; ++ i) {
+			result = result && (first.indices[i] == second.indices[i]);
+			result = result && (first.max_dimensions[i] == second.max_dimensions[i]);
+		  }
+		  return result;
+		}
+		if (first.end && second.end)
+		  return true; 
+		else
+		  return false;
 	  }
 
 	  friend bool operator!=(const FMIterator &first, const FMIterator &second) {
 		return !(first == second);
 	  }
+
+	  template <typename ...Dimensions>
+	  void fill_max_dimensions(size_t index, size_t FIRST_DIM, Dimensions... dimensions) {
+		max_dimensions[index] = FIRST_DIM;
+		fill_max_dimensions(index + 1, dimensions...);
+	  }
+
+	  void fill_max_dimensions(size_t index, size_t FIRST_DIM) {
+		max_dimensions[index] = FIRST_DIM;
+	  }
+
+	  void increment(size_t index) {
+		if (index == 0) {
+		  if (indices[index] < max_dimensions[index]){
+			++ indices[index];
+			if (indices[index] == max_dimensions[index])
+			  end = true;
+		  }
+		  
+		} else {
+		  ++ indices[index];
+		  if (indices[index] == max_dimensions[index]) {
+			increment(index - 1);
+			if (indices[index - 1] < max_dimensions[index - 1]) {
+			  indices[index] = 0;
+			}
+		  }
+		}
+	  }
 	  
 	  FirstDimensionMajorIterator &operator++() {
-		if (at_end != true) {
-		  if (next_iterator.at_end != true) {
-			++ next_iterator;
-			if (next_iterator.at_end == true) {
-			  ++ index;
-			  if (index == DIM_T) {
-				at_end = true;
-			  } else {
-				next_iterator = outer_ptr->array[index].fmbegin();				
-			  }
-			}
-		  }  
-		}
-		// if (next_iterator.at_end != true) {
-		//   ++ next_iterator;
-		//   if (next_iterator.at_end == true) {
-		// 	++ index;
-		//   }
-		// } else {
-		//   if (at_end != true) {
-		// 	++ index;
-		// 	if (index == DIM_T) {
-		// 	  at_end = true;
-		// 	} else {
- 		// 	  next_iterator = outer_ptr->array[index].fmbegin();
-		// 	}
-		//   }
-		// }
+		increment(num_dims - 1);
 		return *this;
 	  }
-	  
+
 	  FirstDimensionMajorIterator operator++(int) {
-		auto it = *this;
-		if (at_end != true) {
-		  if (next_iterator.at_end != true) {
-			++ next_iterator;
-			if (next_iterator.at_end == true) {
-			  ++ index;
-			  if (index == DIM_T) {
-				at_end = true;
-			  } else {
-				next_iterator = outer_ptr->array[index].fmbegin();				
-			  }
-			}
-		  }  
-		}
-		return it;	
+		FMIterator it(*this);
+		increment(num_dims - 1);
+		return it;
 	  }
-	  
-	  T &operator*() const {
-		return *next_iterator;
+
+	  T &operator*() {
+		return outer_ptr->get_data(0, (size_t *)indices);
 	  }
-	  
 	};
 
 	class LastDimensionMajorIterator {
-	 private:
-	  typedef typename NextArray::LastDimensionMajorIterator NextIterator;
-	  friend class Array<T, DIM_T, Dims...>;
+     #define num_dims sizeof...(Dims) + 1
 	 public:
-	  size_t index;
-	  NextIterator next_iterators[DIM_T];
+	  size_t indices[num_dims];
+	  size_t max_dimensions[num_dims];
+	  bool end;
 	  Array<T, DIM_T, Dims...> *outer_ptr;
-	  bool at_end;
-	  LastDimensionMajorIterator(Array<T, DIM_T, Dims...> &outer_class, bool end) {
-		if (!end) {
-		  at_end = false;
-		  index = 0;
-		} else {
-		  at_end = true;
-		  index = DIM_T;
-		}
-		outer_ptr = &outer_class;
-		if (!end) {
-		  for (unsigned int i = 0; i < DIM_T; ++ i) {
-			next_iterators[i] = outer_ptr->array[i].lmbegin();
-		  }
-		} else {
-		  for (unsigned int i = 0; i < DIM_T; ++ i) {
-			next_iterators[i] = outer_ptr->array[i].lmend();
-		  }
-		}
-	  }
 	  
 	  LastDimensionMajorIterator() {
-		at_end = false;
-		index = 0;
-		outer_ptr = nullptr;
-	  }
-	  
-	  LastDimensionMajorIterator(const LMIterator &other) {
-		at_end = other.at_end;
-		index = other.index;
-		outer_ptr = other.outer_ptr;
-		for (unsigned int i = 0; i < DIM_T; ++ i) {
-		  next_iterators[i] = other.next_iterators[i];
+		fill_max_dimensions(0, DIM_T, Dims...);
+		for (unsigned int i = 0; i < num_dims; ++ i) {
+		  indices[i] = 0;
 		}
+		outer_ptr = nullptr;
+		end = false;
 	  }
-	  
+
+	  LastDimensionMajorIterator(Array<T, DIM_T, Dims...> &outer, bool begin) {
+		fill_max_dimensions(0, DIM_T, Dims...);
+		if (begin) {
+		  for (unsigned int i = 0; i < num_dims; ++ i) {
+			indices[i] = 0;
+		  }
+		  end = false;
+		} else {
+		  end = true;
+		  for (unsigned int i = 0; i < num_dims; ++ i) {
+			indices[i] = 0;
+		  }
+		}
+		outer_ptr = &outer;
+	  }
+
+	  LastDimensionMajorIterator(const LMIterator &other) {
+		std::memcpy(indices, other.indices, sizeof(size_t) * num_dims);
+		std::memcpy(max_dimensions, max_dimensions, sizeof(size_t) * num_dims);
+		outer_ptr = other.outer_ptr;
+		end = other.end;
+	  }
+
 	  LastDimensionMajorIterator &operator=(const LMIterator &other) {
 		if (this == &other)
 		  return *this;
-		at_end = other.at_end;
-		index = other.index;
+		std::memcpy(indices, other.indices, sizeof(size_t) * num_dims);
+		std::memcpy(max_dimensions, max_dimensions, sizeof(size_t) * num_dims);
 		outer_ptr = other.outer_ptr;
-		for (unsigned int i = 0; i < DIM_T; ++ i) {
-		  next_iterators[i] = other.next_iterators[i];
-		}
+		end = other.end;
 		return *this;
 	  }
 
 	  friend bool operator==(const LMIterator &first, const LMIterator &second) {
-		if (first.index == second.index && first.outer_ptr == second.outer_ptr) {
-		  for (unsigned int i = 0; i < DIM_T; ++ i) {
-			if (first.next_iterators[i] != second.next_iterators[i])
-			  return false;
+		if (!first.end && !second.end){
+		  bool result = false;
+		  result = first.outer_ptr == second.outer_ptr;
+		  for(unsigned int i = 0; i < num_dims; ++ i) {
+			result = result && (first.indices[i] == second.indices[i]);
+			result = result && (first.max_dimensions[i] == second.max_dimensions[i]);
 		  }
-		  return true;
+		  return result;
 		}
-		return false;
+		if (first.end && second.end)
+		  return true; 
+		else
+		  return false;
 	  }
 
 	  friend bool operator!=(const LMIterator &first, const LMIterator &second) {
 		return !(first == second);
 	  }
+
+	  template <typename ...Dimensions>
+	  void fill_max_dimensions(size_t index, size_t FIRST_DIM, Dimensions... dimensions) {
+		max_dimensions[index] = FIRST_DIM;
+		fill_max_dimensions(index + 1, dimensions...);
+	  }
+
+	  void fill_max_dimensions(size_t index, size_t FIRST_DIM) {
+		max_dimensions[index] = FIRST_DIM;
+	  }
+
+	  void increment(size_t index) {
+		if (index == num_dims - 1) {
+		  if (indices[index] < max_dimensions[index]){
+			++ indices[index];
+			if (indices[index] == max_dimensions[index])
+			  end = true;
+		  }
+		} else {
+		  ++ indices[index];
+		  if (indices[index] == max_dimensions[index]) {
+			increment(index + 1);
+			if (indices[index + 1] < max_dimensions[index + 1]) {
+			  indices[index] = 0;
+			}
+		  }
+		}
+	  }
 	  
 	  LastDimensionMajorIterator &operator++() {
-		// if (next_iterators[index].at_end != true) {
-		//   ++ (next_iterators[index]);
-		//   ++ index;
-		//   index = index % DIM_T;
-		// } else {
-		//   if (at_end != true) {
-			
-		//   }
-		// }
-		if (at_end != true) {
-		  ++ (next_iterators[index]);
-		  ++ index;
-		  index = index % DIM_T;
-		  if (next_iterators[index].at_end == true) {
-			at_end = true;
-			index = DIM_T;
-		  }
-		}
+		increment(0);
 		return *this;
 	  }
-	  
+
 	  LastDimensionMajorIterator operator++(int) {
-		auto it = *this;
-		if (at_end != true) {
-		  ++ (next_iterators[index]);
-		  ++ index;
-		  index = index % DIM_T;
-		  if (next_iterators[index].at_end == true) {
-			at_end = true;
-		  }
-		}
-		return it;	
+		LMIterator it(*this);
+		increment(0);
+		return it;
 	  }
-	  
-	  T &operator*() const {
-		return *(next_iterators[index]);
+
+	  T &operator*() {
+		return outer_ptr->get_data(0, (size_t *)indices);
 	  }
-	  
 	};
+
+	T &get_data(size_t index, size_t *indices) {
+	  return array[*(indices + index)].get_data(index + 1, indices);
+	}
 	
 	Array() {
 	  static_assert(DIM_T != 0);
@@ -304,20 +313,19 @@ namespace cs540 {
 	}
 
 	FMIterator fmbegin() {
-	  return FMIterator(*this, false);
+	  return FMIterator(*this, true);
 	}
 
 	FMIterator fmend() {
-	  return FMIterator(*this, true);
-	  
+	  return FMIterator(*this, false);	  
 	}
 
 	LMIterator lmbegin() {
-	  return LMIterator(*this, false);
+	  return LMIterator(*this, true);
 	}
 
 	LMIterator lmend() {
-	  return LMIterator(*this, true);
+	  return LMIterator(*this, false);
 	}
   };
 
@@ -330,226 +338,172 @@ namespace cs540 {
 	class LastDimensionMajorIterator;
 	typedef FirstDimensionMajorIterator FMIterator;
 	typedef LastDimensionMajorIterator LMIterator;
+
 	class FirstDimensionMajorIterator {
-	 private:
 	 public:
-	  friend class Array<T, DIM_T>;
+	  size_t current_index;
+	  bool end;
 	  Array<T, DIM_T> *outer_ptr;
-	  size_t index;
-	  bool at_end;
-	  FirstDimensionMajorIterator(Array<T, DIM_T> &outer_class, bool end) {
-		if (!end) {
-		  at_end = false;
-		  index = 0;
-		} else {
-		  at_end = true;
-		  index = DIM_T;
-		}
-		outer_ptr = &outer_class;
-	  }
 	  
 	  FirstDimensionMajorIterator() {
-		at_end = false;
-		index = 0;
+		current_index = 0;
 		outer_ptr = nullptr;
+		end = false;
+	  }
+
+	  FirstDimensionMajorIterator(Array<T, DIM_T> &outer, bool begin) {
+		if (begin) {
+		  current_index = 0;
+		  end = false;
+		} else {
+		  end = true;
+		  current_index = 0;
+		}
+		outer_ptr = &outer;
 	  }
 
 	  FirstDimensionMajorIterator(const FMIterator &other) {
-		at_end = other.at_end;
-		index = other.index;
+		current_index = other.current_index;
 		outer_ptr = other.outer_ptr;
+		end = other.end;
 	  }
 
 	  FirstDimensionMajorIterator &operator=(const FMIterator &other) {
 		if (this == &other)
-		  return *this; 
-		at_end = other.at_end;
-		index = other.index;
+		  return *this;
+		current_index = other.current_index;
 		outer_ptr = other.outer_ptr;
+		end = other.end;
 		return *this;
 	  }
 
 	  friend bool operator==(const FMIterator &first, const FMIterator &second) {
-		return (first.index == second.index) && (first.outer_ptr == second.outer_ptr);
+		if (!first.end && !second.end){
+		  bool result = (first.outer_ptr == second.outer_ptr) &&
+			(first.current_index == second.current_index);
+		  return result;		  
+		}
+		if (first.end && second.end)
+		  return true; 
+		else
+		  return false;
+
 	  }
 
 	  friend bool operator!=(const FMIterator &first, const FMIterator &second) {
 		return !(first == second);
 	  }
-
+	  
 	  FirstDimensionMajorIterator &operator++() {
-		if (at_end != true) {
-		  ++ index;
-		  if (index == DIM_T) {
-			at_end = true;
+		if (current_index < DIM_T) {
+		  ++ current_index;
+		  if (current_index == DIM_T) {
+			end = true;
 		  }
 		}
 		return *this;
 	  }
 
 	  FirstDimensionMajorIterator operator++(int) {
-		auto it = *this;
-		if (at_end != true) {
-		  ++ index;
-		  if (index == DIM_T) {
-			at_end = true;
+		FMIterator it(*this);
+		if (current_index < DIM_T) {
+		  ++ current_index;
+		  if (current_index == DIM_T) {
+			end = true;
 		  }
 		}
 		return it;
 	  }
 
-	  T &operator*() const {
-		return outer_ptr->array[index];
+	  T &operator*() {
+		return outer_ptr->array[current_index];
 	  }
 	};
 
 	class LastDimensionMajorIterator {
-	 private:
 	 public:
-	  friend class Array<T, DIM_T>;
+	  size_t current_index;
+	  bool end;
 	  Array<T, DIM_T> *outer_ptr;
-	  size_t index;
-	  bool at_end;
-	  LastDimensionMajorIterator(Array<T, DIM_T> &outer_class, bool end) {
-		if (!end) {
-		  at_end = false;
-		  index = 0;
-		} else {
-		  at_end = true;
-		  index = DIM_T;
-		}
-		outer_ptr = &outer_class;
-	  }
 	  
 	  LastDimensionMajorIterator() {
-		at_end = false;
-		index = 0;
+		current_index = 0;
 		outer_ptr = nullptr;
+		end = false;
+	  }
+
+	  LastDimensionMajorIterator(Array<T, DIM_T> &outer, bool begin) {
+		if (begin) {
+		  current_index = 0;
+		  end = false;
+		} else {
+		  end = true;
+		  current_index = 0;
+		}
+		outer_ptr = &outer;
 	  }
 
 	  LastDimensionMajorIterator(const LMIterator &other) {
-		at_end = other.at_end;
-		index = other.index;
+		current_index = other.current_index;
 		outer_ptr = other.outer_ptr;
+		end = other.end;
 	  }
 
 	  LastDimensionMajorIterator &operator=(const LMIterator &other) {
 		if (this == &other)
-		  return *this; 
-		at_end = other.at_end;
-		index = other.index;
+		  return *this;
+		current_index = other.current_index;
 		outer_ptr = other.outer_ptr;
+		end = other.end;
 		return *this;
 	  }
 
 	  friend bool operator==(const LMIterator &first, const LMIterator &second) {
-		return (first.index == second.index) && (first.outer_ptr == second.outer_ptr);
+		if (!first.end && !second.end){
+		  bool result = (first.outer_ptr == second.outer_ptr) &&
+			(first.current_index == second.current_index);
+		  return result;		  
+		}
+		if (first.end && second.end)
+		  return true; 
+		else
+		  return false;
+
 	  }
 
 	  friend bool operator!=(const LMIterator &first, const LMIterator &second) {
 		return !(first == second);
 	  }
-
+	  
 	  LastDimensionMajorIterator &operator++() {
-		if (at_end != true) {
-		  ++ index;
-		  if (index == DIM_T) {
-			at_end = true;
+		if (current_index < DIM_T) {
+		  ++ current_index;
+		  if (current_index == DIM_T) {
+			end = true;
 		  }
 		}
 		return *this;
 	  }
 
 	  LastDimensionMajorIterator operator++(int) {
-		auto it = *this;
-		if (at_end != true) {
-		  ++ index;
-		  if (index == DIM_T) {
-			at_end = true;
+		LMIterator it(*this);
+		if (current_index < DIM_T) {
+		  ++ current_index;
+		  if (current_index == DIM_T) {
+			end = true;
 		  }
 		}
 		return it;
 	  }
 
-	  T &operator*() const {
-		return outer_ptr->array[index];
-	  }	  
+	  T &operator*() {
+		return outer_ptr->array[current_index];
+	  }
 	};
 
-	// class LastDimensionMajorIterator {
-	//  private:
-	//   friend class Array<T, DIM_T>;
-	//   Array<T, DIM_T> *outer_ptr;
-	//   size_t index;
-	//  public:
-	//   bool at_end;
-	//   LastDimensionMajorIterator(Array<T, DIM_T> &outer_class, bool end) {
-	// 	if (!end) {
-	// 	  at_end = false;
-	// 	  index = DIM_T - 1;		  
-	// 	} else {
-	// 	  at_end = true;
-	// 	  index = 0;
-	// 	}
-	// 	outer_ptr = &outer_class;
-	//   }
-	  
-	//   LastDimensionMajorIterator() {
-	// 	at_end = false;
-	// 	index = DIM_T - 1;
-	// 	outer_ptr = nullptr;
-	//   }
-
-	//   LastDimensionMajorIterator(const LMIterator &other) {
-	// 	at_end = other.at_end;
-	// 	index = other.index;
-	// 	outer_ptr = other.outer_ptr;
-	//   }
-
-	//   LastDimensionMajorIterator &operator=(const LMIterator &other) {
-	// 	if (this == &other)
-	// 	  return *this;
-	// 	at_end = other.at_end;
-	// 	index = other.index;
-	// 	outer_ptr = other.outer_ptr;
-	// 	return *this;
-	//   }
-
-	//   friend bool operator==(const LMIterator &first, const LMIterator &second) {
-	// 	return (first.index == second.index) && (first.outer_ptr == second.outer_ptr);
-	//   }
-
-	//   friend bool operator!=(const LMIterator &first, const LMIterator &second) {
-	// 	return !(first == second);
-	//   }
-
-	//   LastDimensionMajorIterator &operator++() {
-	// 	if (at_end != true) {
-	// 	  if (index == 0) {
-	// 		at_end = true;
-	// 	  } else {
-	// 		-- index;	
-	// 	  }
-	// 	}
-	// 	return *this;
-	//   }
-
-	//   LastDimensionMajorIterator operator++(int) {
-	// 	auto it = *this;
-	// 	if (at_end != true) {
-	// 	  if (index == 0) {
-	// 		at_end = true;
-	// 	  } else {
-	// 		-- index;	
-	// 	  }
-	// 	}
-	// 	return it;
-	//   }
-
-	//   T &operator*() const {
-	// 	return outer_ptr->array[index];
-	//   }
-	// };
+	T &get_data(size_t index, size_t *indices) {
+	  return array[*(indices + index)];
+	}
 	
 	Array() {
 	  static_assert(DIM_T != 0);
@@ -602,19 +556,19 @@ namespace cs540 {
 	}
 	
 	FMIterator fmbegin() {
-	  return FMIterator(*this, false);
+	  return FMIterator(*this, true);
 	}
 
 	FMIterator fmend() {
-	  return FMIterator(*this, true);
+	  return FMIterator(*this, false);
 	}
 		
 	LMIterator lmbegin() {
-	  return LMIterator(*this, false);
+	  return LMIterator(*this, true);
 	}
 
 	LMIterator lmend() {
-	  return LMIterator(*this, true);
+	  return LMIterator(*this, false);
 	}
   };
 }
